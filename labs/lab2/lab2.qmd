@@ -1,8 +1,8 @@
 ---
-title: "Lab 1"
-description: "This is my lab 1"
+title: "Lab 2"
+description: "This is my lab 2"
 author: "Mayu Tatsumi"
-date: "8/26/25"
+date: "8/27/25"
 categories:
   - reflection
   - labreport

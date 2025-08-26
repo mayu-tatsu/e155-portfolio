@@ -1,6 +1,6 @@
 # Quarto Rendered Folders
-.quarto/
-_site/
+/.quarto/
+/_site/
 
 # Mac system Files
 .DS_Store
