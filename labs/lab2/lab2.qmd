@@ -1,6 +1,6 @@
 ---
-title: "Lab 2"
-description: "This is my lab 2"
+title: "Lab 2: Multiplexed 7-Segment Display"
+description: "Lab 2"
 author: "Mayu Tatsumi"
 date: "8/27/25"
 categories:

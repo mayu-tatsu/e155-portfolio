@@ -1,10 +1,15 @@
 ---
-title: "Hello Quarto"
-description: "Welcome to my Quarto portfolio"
+title: "Initial Reflection"
+description: "Goals for this Semester in MicroPs"
 author: "Mayu Tatsumi"
 date: "8/26/25"
 categories:
   - reflection
-  - labreport
 draft: false
 ---
+
+I had a blast this summer working as a Systems Control intern at a company working on some embedded systems for their robot. I mostly worked off what my mentor taught me and what I could soak up from the datasheets and user manuals, so I'm excited to get more formal and grounded education in this field.
+
+For this semester, I'm determined to keep myself focused and engaged in class. I'll write everything on paper since we're going chalkboard method and keep all my devices in my bag unless I need to. I've found out that (surprise!) I actually do learn more via paper and pen, so I'll try my best to stay locked in and get the most out of this class. I definitely will also review what I've learned in E85 since it's been a while.
+
+I also want to technically improve my soldering skills and generally working with my hands when it comes to electronics. I had to do a lot of manually soldering and crimping parts together over the summer as well, and I found I had some trouble with it so I want to take this chance as a moment to improve for the future. I'll have to make some time and take advantage of Mudd's resources to practice and make perfect.

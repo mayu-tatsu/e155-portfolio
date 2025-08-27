@@ -1,0 +1,10 @@
+---
+title: "Lab 5: Interrupts"
+description: "Lab 5"
+author: "Mayu Tatsumi"
+date: "8/27/25"
+categories:
+  - reflection
+  - labreport
+draft: false
+---

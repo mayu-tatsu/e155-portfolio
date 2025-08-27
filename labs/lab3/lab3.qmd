@@ -1,6 +1,6 @@
 ---
-title: "Lab 3"
-description: "This is my lab 3"
+title: "Lab 3: Keypad Scanner"
+description: "Lab 3"
 author: "Mayu Tatsumi"
 date: "8/27/25"
 categories:

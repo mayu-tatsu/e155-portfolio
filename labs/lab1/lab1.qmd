@@ -1,6 +1,6 @@
 ---
-title: "Lab 1"
-description: "This is my lab 1"
+title: "Lab 1: FPGA and MCU Setup and Testing"
+description: "Lab 1"
 author: "Mayu Tatsumi"
 date: "8/26/25"
 categories:

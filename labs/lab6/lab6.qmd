@@ -1,0 +1,10 @@
+---
+title: "Lab 6: The Internet of Things and Serial Peripheral Interface"
+description: "Lab 6"
+author: "Mayu Tatsumi"
+date: "8/27/25"
+categories:
+  - reflection
+  - labreport
+draft: false
+---
