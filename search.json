@@ -1,0 +1,72 @@
+[
+  {
+    "objectID": "blog.html",
+    "href": "blog.html",
+    "title": "E155 Blog",
+    "section": "",
+    "text": "Initial Reflection\n\n\nGoals for this Semester in MicroPs\n\n\n\n\n\nAug 26, 2025\n\n\nMayu Tatsumi\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "E155 Portfolio",
+    "section": "",
+    "text": "Mayu Tatsumi is a junior studying Engineering at Harvey Mudd College. She is interested in working in the camera and lighting industries and would like to become involved as an electronic engineer. She has prior experience working as a Systems Control intern specifically working on embedded systems and writing firmware. Outside of engineering, she is interested in movie & TV production, Formula 1, and gaming.\nThis is a Quarto website. To learn more about Quarto websites visit https://quarto.org/docs/websites."
+  },
+  {
+    "objectID": "posts/first-post.html",
+    "href": "posts/first-post.html",
+    "title": "Initial Reflection",
+    "section": "",
+    "text": "I had a blast this summer working as a Systems Control intern at a company working on some embedded systems for their robot. I mostly worked off what my mentor taught me and what I could soak up from the datasheets and user manuals, so I’m excited to get more formal and grounded education in this field.\nFor this semester, I’m determined to keep myself focused and engaged in class. I’ll write everything on paper since we’re going chalkboard method and keep all my devices in my bag unless I need to. I’ve found out that (surprise!) I actually do learn more via paper and pen, so I’ll try my best to stay locked in and get the most out of this class. I definitely will also review what I’ve learned in E85 since it’s been a while.\nI also want to technically improve my soldering skills and generally working with my hands when it comes to electronics. I had to do a lot of manually soldering and crimping parts together over the summer as well, and I found I had some trouble with it so I want to take this chance as a moment to improve for the future. I’ll have to make some time and take advantage of Mudd’s resources to practice and make perfect."
+  },
+  {
+    "objectID": "labs.html#lab-2-multiplexed-7-segment-display",
+    "href": "labs.html#lab-2-multiplexed-7-segment-display",
+    "title": "E155 Lab List",
+    "section": "Lab 2: Multiplexed 7-Segment Display",
+    "text": "Lab 2: Multiplexed 7-Segment Display"
+  },
+  {
+    "objectID": "labs.html#lab-3-keypad-scanner",
+    "href": "labs.html#lab-3-keypad-scanner",
+    "title": "E155 Lab List",
+    "section": "Lab 3: Keypad Scanner",
+    "text": "Lab 3: Keypad Scanner"
+  },
+  {
+    "objectID": "labs.html#lab-4-digital-audio",
+    "href": "labs.html#lab-4-digital-audio",
+    "title": "E155 Lab List",
+    "section": "Lab 4: Digital Audio",
+    "text": "Lab 4: Digital Audio"
+  },
+  {
+    "objectID": "labs.html#lab-5-interrupts",
+    "href": "labs.html#lab-5-interrupts",
+    "title": "E155 Lab List",
+    "section": "Lab 5: Interrupts",
+    "text": "Lab 5: Interrupts"
+  },
+  {
+    "objectID": "labs.html#lab-6-the-internet-of-things-and-serial-peripheral-interface",
+    "href": "labs.html#lab-6-the-internet-of-things-and-serial-peripheral-interface",
+    "title": "E155 Lab List",
+    "section": "Lab 6: The Internet of Things and Serial Peripheral Interface",
+    "text": "Lab 6: The Internet of Things and Serial Peripheral Interface"
+  },
+  {
+    "objectID": "labs.html#lab-7-the-advanced-encryption-standard",
+    "href": "labs.html#lab-7-the-advanced-encryption-standard",
+    "title": "E155 Lab List",
+    "section": "Lab 7: The Advanced Encryption Standard",
+    "text": "Lab 7: The Advanced Encryption Standard"
+  },
+  {
+    "objectID": "resources.html",
+    "href": "resources.html",
+    "title": "E155 Resources",
+    "section": "",
+    "text": "Link to E155 Course Webpage"
+  }
+]
