@@ -2,9 +2,10 @@
 title: "Lab 2: Multiplexed 7-Segment Display"
 description: "Lab 2"
 author: "Mayu Tatsumi"
-date: "8/27/25"
+date: "9/11/25"
 categories:
-  - reflection
   - labreport
 draft: false
 ---
+
+Nothing to see here just yet.

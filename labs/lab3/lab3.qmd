@@ -2,9 +2,10 @@
 title: "Lab 3: Keypad Scanner"
 description: "Lab 3"
 author: "Mayu Tatsumi"
-date: "8/27/25"
+date: "10/23/25"
 categories:
-  - reflection
   - labreport
 draft: false
 ---
+
+Nothing to see here just yet.

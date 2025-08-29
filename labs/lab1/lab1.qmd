@@ -2,9 +2,8 @@
 title: "Lab 1: FPGA and MCU Setup and Testing"
 description: "Lab 1"
 author: "Mayu Tatsumi"
-date: "8/26/25"
+date: "9/4/25"
 categories:
-  - reflection
   - labreport
 draft: false
 ---

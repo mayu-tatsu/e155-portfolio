@@ -2,9 +2,10 @@
 title: "Lab 4: Digital Audio"
 description: "Lab 4"
 author: "Mayu Tatsumi"
-date: "8/27/25"
+date: "9/25/25"
 categories:
-  - reflection
   - labreport
 draft: false
 ---
+
+Nothing to see here just yet.

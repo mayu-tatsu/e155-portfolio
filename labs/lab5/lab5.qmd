@@ -2,9 +2,10 @@
 title: "Lab 5: Interrupts"
 description: "Lab 5"
 author: "Mayu Tatsumi"
-date: "8/27/25"
+date: "10/2/25"
 categories:
-  - reflection
   - labreport
 draft: false
 ---
+
+Nothing to see here just yet.
