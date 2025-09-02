@@ -1,9 +1,46 @@
 ---
 title: "Lab 1: FPGA and MCU Setup and Testing"
-description: "Lab 1"
+description: "Lab 1. Hours spent: 20 Hours"
 author: "Mayu Tatsumi"
 date: "9/4/25"
 categories:
   - labreport
 draft: false
 ---
+
+## Introduction
+In this lab, the E155 Development Board was constructed for use for the rest of the semester. The field-programmable gate array (FPGA) was programmed to take binary input from 4 switches and output patterns using 3 LEDs and a seven-segment display.
+
+One of the LEDs was designed to blink at 2.4 Hz by dividing the onboard high-speed oscillator from 24 MHz. The two other LEDs were programmed by applying a XOR and AND gate from inputs from the switches. The seven-segment display was programmed to display distince hexadecimal values between 0 to F given a combination of 4 binary inputs through the same switches.
+
+## Design and Testing Methodology
+
+For the blinking LED, the onboard high-speed oscillator, named HSOSC as part of the iCE40 UltraPlus primitive library, was used to generate a 24 MHz oscillation acting as a clock signal. Utilizing a counterFor the blinking led, the onboard high-speed oscillator, named HSOSC as part of the iCE40 UltraPlus primitive library, was used to generate a 24 MHz oscillation acting as a clock signal. Aiming for a 2.4 Hz signal that alternates twice (??), it was necessary to utilize a 24*10^6 Hz / 2.4 Hz / 2 = 5,000,000 counter in the clock divider. Testing for the blinking LED was conducted by an oscilloscope, where one probe was connected to the GND on the FPGA and the other at the () of the diode.
+
+The other two LEDs were implemented using a XOR and AND gate following the given truth table. 
+
+The seven-segment display was programmed by using combinational logic and case statements in the HDL. 
+
+## Technical Documentation
+
+The source code for the project can be found in this [GitHub repository](https://github.com/mayu-tatsu/e155-lab1).
+
+# Block Diagram
+
+Figure 1 depicts the block diagram of the design. The top-level module lab1_mt instantiates two submodules within it, one for the LED logic, leds, and another for the seven segment logic, sev_seg.
+
+# Schematic
+
+Figure 2 depicts the physical schematic of the design. 
+
+## Results and Discussion
+
+# Testbench Simulation
+
+The design met all intended design objectives. Figure 3, 4, and 5 show screenshots of the QuestaSim simulation of the testbenches designed for each module. However, since the 2.4 Hz blinking LED is difficult to test for in the testbench, it was forced to 0 through the command force led[2] 0 before running the tests.
+
+Figure 6 shows a screenshot of an oscilloscope hooked 
+
+## Conclusion
+
+## AI Prototype Summary
