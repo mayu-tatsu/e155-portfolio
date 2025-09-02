@@ -8,7 +8,7 @@
 
 <meta name="author" content="Mayu Tatsumi">
 <meta name="dcterms.date" content="2025-09-04">
-<meta name="description" content="Lab 1">
+<meta name="description" content="Lab 1. Hours spent: 20 Hours">
 
 <title>Lab 1: FPGA and MCU Setup and Testing – E155 Portfolio</title>
 <style>
@@ -119,8 +119,26 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#design-and-testing-methodology" id="toc-design-and-testing-methodology" class="nav-link" data-scroll-target="#design-and-testing-methodology">Design and Testing Methodology</a></li>
+  <li><a href="#technical-documentation" id="toc-technical-documentation" class="nav-link" data-scroll-target="#technical-documentation">Technical Documentation</a></li>
+  <li><a href="#block-diagram" id="toc-block-diagram" class="nav-link" data-scroll-target="#block-diagram">Block Diagram</a></li>
+  <li><a href="#schematic" id="toc-schematic" class="nav-link" data-scroll-target="#schematic">Schematic</a>
+  <ul class="collapse">
+  <li><a href="#results-and-discussion" id="toc-results-and-discussion" class="nav-link" data-scroll-target="#results-and-discussion">Results and Discussion</a></li>
+  </ul></li>
+  <li><a href="#testbench-simulation" id="toc-testbench-simulation" class="nav-link" data-scroll-target="#testbench-simulation">Testbench Simulation</a>
+  <ul class="collapse">
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  <li><a href="#ai-prototype-summary" id="toc-ai-prototype-summary" class="nav-link" data-scroll-target="#ai-prototype-summary">AI Prototype Summary</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -135,7 +153,7 @@ ul.task-list li input[type="checkbox"] {
 
 <div>
   <div class="description">
-    Lab 1
+    Lab 1. Hours spent: 20 Hours
   </div>
 </div>
 
@@ -164,8 +182,45 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>In this lab, the E155 Development Board was constructed for use for the rest of the semester. The field-programmable gate array (FPGA) was programmed to take binary input from 4 switches and output patterns using 3 LEDs and a seven-segment display.</p>
+<p>One of the LEDs was designed to blink at 2.4 Hz by dividing the onboard high-speed oscillator from 24 MHz. The two other LEDs were programmed by applying a XOR and AND gate from inputs from the switches. The seven-segment display was programmed to display distince hexadecimal values between 0 to F given a combination of 4 binary inputs through the same switches.</p>
+</section>
+<section id="design-and-testing-methodology" class="level2">
+<h2 class="anchored" data-anchor-id="design-and-testing-methodology">Design and Testing Methodology</h2>
+<p>For the blinking LED, the onboard high-speed oscillator, named HSOSC as part of the iCE40 UltraPlus primitive library, was used to generate a 24 MHz oscillation acting as a clock signal. Utilizing a counterFor the blinking led, the onboard high-speed oscillator, named HSOSC as part of the iCE40 UltraPlus primitive library, was used to generate a 24 MHz oscillation acting as a clock signal. Aiming for a 2.4 Hz signal that alternates twice (??), it was necessary to utilize a 24*10^6 Hz / 2.4 Hz / 2 = 5,000,000 counter in the clock divider. Testing for the blinking LED was conducted by an oscilloscope, where one probe was connected to the GND on the FPGA and the other at the () of the diode.</p>
+<p>The other two LEDs were implemented using a XOR and AND gate following the given truth table.</p>
+<p>The seven-segment display was programmed by using combinational logic and case statements in the HDL.</p>
+</section>
+<section id="technical-documentation" class="level2">
+<h2 class="anchored" data-anchor-id="technical-documentation">Technical Documentation</h2>
+<p>The source code for the project can be found in this <a href="https://github.com/mayu-tatsu/e155-lab1">GitHub repository</a>.</p>
+</section>
+<section id="block-diagram" class="level1">
+<h1>Block Diagram</h1>
+<p>Figure 1 depicts the block diagram of the design. The top-level module lab1_mt instantiates two submodules within it, one for the LED logic, leds, and another for the seven segment logic, sev_seg.</p>
+</section>
+<section id="schematic" class="level1">
+<h1>Schematic</h1>
+<p>Figure 2 depicts the physical schematic of the design.</p>
+<section id="results-and-discussion" class="level2">
+<h2 class="anchored" data-anchor-id="results-and-discussion">Results and Discussion</h2>
+</section>
+</section>
+<section id="testbench-simulation" class="level1">
+<h1>Testbench Simulation</h1>
+<p>The design met all intended design objectives. Figure 3, 4, and 5 show screenshots of the QuestaSim simulation of the testbenches designed for each module. However, since the 2.4 Hz blinking LED is difficult to test for in the testbench, it was forced to 0 through the command force led[2] 0 before running the tests.</p>
+<p>Figure 6 shows a screenshot of an oscilloscope hooked</p>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+</section>
+<section id="ai-prototype-summary" class="level2">
+<h2 class="anchored" data-anchor-id="ai-prototype-summary">AI Prototype Summary</h2>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
