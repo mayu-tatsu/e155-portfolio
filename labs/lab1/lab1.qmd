@@ -1,6 +1,5 @@
 ---
 title: "Lab 1: FPGA and MCU Setup and Testing"
-description: "Lab 1. Hours spent: 20 Hours"
 author: "Mayu Tatsumi"
 date: "9/4/25"
 categories:
@@ -9,13 +8,15 @@ draft: false
 ---
 
 ## Introduction
-In this lab, the E155 Development Board was constructed for use for the rest of the semester. The field-programmable gate array (FPGA) was programmed to take binary input from 4 switches and output patterns using 3 LEDs and a seven-segment display.
+In this lab, the E155 Development Board was assembled for use for the rest of the semester. Preliminary testing was done on both FPGA and MCU components of the board via simple given projects. The primary objective of this lab was to program the FPGA to take binary input from 4 switches and output patterns using 3 LEDs and a seven-segment display.
 
-One of the LEDs was designed to blink at 2.4 Hz by dividing the onboard high-speed oscillator from 24 MHz. The two other LEDs were programmed by applying a XOR and AND gate from inputs from the switches. The seven-segment display was programmed to display distince hexadecimal values between 0 to F given a combination of 4 binary inputs through the same switches.
+One of the LEDs was designed to blink at 2.4 Hz by dividing the onboard high-speed oscillator, used as a clock, from 24 MHz. The two other LEDs were each programmed by applying a XOR and AND gate using 2 inputs from the 4 switches, following a truth table given in the instructions. The seven-segment display was programmed to display distince hexadecimal values between 0 to F given a combination of 4 binary inputs through the same switches.
+
+[Lab 1 Instructions](https://hmc-e155.github.io/lab/lab1/)
 
 ## Design and Testing Methodology
 
-For the blinking LED, the onboard high-speed oscillator, named HSOSC as part of the iCE40 UltraPlus primitive library, was used to generate a 24 MHz oscillation acting as a clock signal. Utilizing a counterFor the blinking led, the onboard high-speed oscillator, named HSOSC as part of the iCE40 UltraPlus primitive library, was used to generate a 24 MHz oscillation acting as a clock signal. Aiming for a 2.4 Hz signal that alternates twice (??), it was necessary to utilize a 24*10^6 Hz / 2.4 Hz / 2 = 5,000,000 counter in the clock divider. Testing for the blinking LED was conducted by an oscilloscope, where one probe was connected to the GND on the FPGA and the other at the () of the diode.
+For the blinking LED, the onboard high-speed oscillator, named HSOSC as part of the iCE40 UltraPlus primitive library, was used to generate a 24 MHz oscillation acting as a clock signal. Utilizing a counterFor the blinking led, the onboard high-speed oscillator, named HSOSC as part of the iCE40 UltraPlus primitive library, was used to generate a 24 MHz oscillation acting as a clock signal. Aiming for a 2.4 Hz signal, the clock divider was devised to use a counter that, between values of 0-5,000,000, kept the LED off, and between 5,000,000-10,000,000 turned the LED on. This was designed by dividing the 24 MHz clock down to 2.4 Hz requires a counter that reaches 10,000,000, ensuring the LED blinks at the desired frequency with a single on-off cycle per period. Testing for the blinking LED was conducted by an oscilloscope, where one probe was connected to the GND on the FPGA and the other at the anode(?) of the diode.
 
 The other two LEDs were implemented using a XOR and AND gate following the given truth table. 
 
@@ -27,7 +28,7 @@ The source code for the project can be found in this [GitHub repository](https:/
 
 # Block Diagram
 
-Figure 1 depicts the block diagram of the design. The top-level module lab1_mt instantiates two submodules within it, one for the LED logic, leds, and another for the seven segment logic, sev_seg.
+Figure 1 depicts the block diagram of the design. The top-level module `lab1_mt` instantiates two submodules within it, one for the LED logic, `leds`, and another for the seven segment logic, `sev_seg`.
 
 # Schematic
 
@@ -39,8 +40,12 @@ Figure 2 depicts the physical schematic of the design.
 
 The design met all intended design objectives. Figure 3, 4, and 5 show screenshots of the QuestaSim simulation of the testbenches designed for each module. However, since the 2.4 Hz blinking LED is difficult to test for in the testbench, it was forced to 0 through the command force led[2] 0 before running the tests.
 
-Figure 6 shows a screenshot of an oscilloscope hooked 
+Figure 6 shows a screenshot of an oscilloscope verifying the 2.41 Hz frequency of the LED.
+
+This video below demonstrates all possible configurations of the switches and consequently the values of the LED and seven-segment display.
 
 ## Conclusion
+
+Overall, the design blinked an LED at 2.4 Hz using the onboard high-speed oscillator, changed the state of two other LEDs depending on the input of the four switches, following the logic of a given truth table. The seven segment display was wired and programmed with combinational logic to display a hexadecimal value given the binary input through the same four switches. Roughly 20 hours were spent working on this lab.
 
 ## AI Prototype Summary
