@@ -8,7 +8,6 @@
 
 <meta name="author" content="Mayu Tatsumi">
 <meta name="dcterms.date" content="2025-09-04">
-<meta name="description" content="Lab 1. Hours spent: 20 Hours">
 
 <title>Lab 1: FPGA and MCU Setup and Testing – E155 Portfolio</title>
 <style>
@@ -71,6 +70,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -126,17 +154,19 @@ ul.task-list li input[type="checkbox"] {
   <ul>
   <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
   <li><a href="#design-and-testing-methodology" id="toc-design-and-testing-methodology" class="nav-link" data-scroll-target="#design-and-testing-methodology">Design and Testing Methodology</a></li>
-  <li><a href="#technical-documentation" id="toc-technical-documentation" class="nav-link" data-scroll-target="#technical-documentation">Technical Documentation</a></li>
+  <li><a href="#technical-documentation" id="toc-technical-documentation" class="nav-link" data-scroll-target="#technical-documentation">Technical Documentation</a>
+  <ul class="collapse">
   <li><a href="#block-diagram" id="toc-block-diagram" class="nav-link" data-scroll-target="#block-diagram">Block Diagram</a></li>
-  <li><a href="#schematic" id="toc-schematic" class="nav-link" data-scroll-target="#schematic">Schematic</a>
-  <ul class="collapse">
-  <li><a href="#results-and-discussion" id="toc-results-and-discussion" class="nav-link" data-scroll-target="#results-and-discussion">Results and Discussion</a></li>
+  <li><a href="#schematic" id="toc-schematic" class="nav-link" data-scroll-target="#schematic">Schematic</a></li>
   </ul></li>
-  <li><a href="#testbench-simulation" id="toc-testbench-simulation" class="nav-link" data-scroll-target="#testbench-simulation">Testbench Simulation</a>
+  <li><a href="#results-and-discussion" id="toc-results-and-discussion" class="nav-link" data-scroll-target="#results-and-discussion">Results and Discussion</a>
   <ul class="collapse">
+  <li><a href="#video-demonstration" id="toc-video-demonstration" class="nav-link" data-scroll-target="#video-demonstration">Video Demonstration</a></li>
+  <li><a href="#testbench-simulation" id="toc-testbench-simulation" class="nav-link" data-scroll-target="#testbench-simulation">Testbench Simulation</a></li>
+  <li><a href="#oscilloscope-trace" id="toc-oscilloscope-trace" class="nav-link" data-scroll-target="#oscilloscope-trace">Oscilloscope Trace</a></li>
+  </ul></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   <li><a href="#ai-prototype-summary" id="toc-ai-prototype-summary" class="nav-link" data-scroll-target="#ai-prototype-summary">AI Prototype Summary</a></li>
-  </ul></li>
   </ul>
 </nav>
     </div>
@@ -151,11 +181,6 @@ ul.task-list li input[type="checkbox"] {
   </div>
   </div>
 
-<div>
-  <div class="description">
-    Lab 1. Hours spent: 20 Hours
-  </div>
-</div>
 
 
 <div class="quarto-title-meta">
@@ -184,42 +209,190 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>In this lab, the E155 Development Board was constructed for use for the rest of the semester. The field-programmable gate array (FPGA) was programmed to take binary input from 4 switches and output patterns using 3 LEDs and a seven-segment display.</p>
-<p>One of the LEDs was designed to blink at 2.4 Hz by dividing the onboard high-speed oscillator from 24 MHz. The two other LEDs were programmed by applying a XOR and AND gate from inputs from the switches. The seven-segment display was programmed to display distince hexadecimal values between 0 to F given a combination of 4 binary inputs through the same switches.</p>
+<p>In this lab, the E155 Development Board was assembled for use for the rest of the semester. Preliminary testing was done on both FPGA and MCU components of the board via simple given projects. The primary objective of this lab was to program the FPGA to take binary input from 4 switches and output patterns using 3 LEDs and a seven-segment display.</p>
+<p>One of the LEDs was designed to blink at 2.4 Hz by dividing the onboard high-speed oscillator, used as a clock, from 24 MHz. The two other LEDs were each programmed by applying a XOR and AND gate using 2 inputs from the 4 switches, following a truth table given in the instructions. The seven-segment display was programmed to display distince hexadecimal values between 0 to F given a combination of 4 binary inputs through the same switches.</p>
+<p>LINK: <a href="https://hmc-e155.github.io/lab/lab1/">E155 Lab 1 Instructions</a></p>
 </section>
 <section id="design-and-testing-methodology" class="level2">
 <h2 class="anchored" data-anchor-id="design-and-testing-methodology">Design and Testing Methodology</h2>
-<p>For the blinking LED, the onboard high-speed oscillator, named HSOSC as part of the iCE40 UltraPlus primitive library, was used to generate a 24 MHz oscillation acting as a clock signal. Utilizing a counterFor the blinking led, the onboard high-speed oscillator, named HSOSC as part of the iCE40 UltraPlus primitive library, was used to generate a 24 MHz oscillation acting as a clock signal. Aiming for a 2.4 Hz signal that alternates twice (??), it was necessary to utilize a 24*10^6 Hz / 2.4 Hz / 2 = 5,000,000 counter in the clock divider. Testing for the blinking LED was conducted by an oscilloscope, where one probe was connected to the GND on the FPGA and the other at the () of the diode.</p>
-<p>The other two LEDs were implemented using a XOR and AND gate following the given truth table.</p>
-<p>The seven-segment display was programmed by using combinational logic and case statements in the HDL.</p>
+<p>For the blinking LED, the onboard high-speed oscillator, named HSOSC as part of the iCE40 UltraPlus primitive library, was used to generate a 24 MHz oscillation acting as a clock signal. Utilizing a counterFor the blinking led, the onboard high-speed oscillator, named HSOSC as part of the iCE40 UltraPlus primitive library, was used to generate a 24 MHz oscillation acting as a clock signal. Aiming for a 2.4 Hz signal, the clock divider was devised to use a counter that, between values of 0-5,000,000, kept the LED off, and between 5,000,000-10,000,000 turned the LED on. This was designed by dividing the 24 MHz clock down to 2.4 Hz requires a counter that reaches 10,000,000, ensuring the LED blinks at the desired frequency with a single on-off cycle per period. Testing for the blinking LED was conducted by an oscilloscope, where one probe was connected to the GND on the FPGA and the other at the anode of the diode.</p>
+<p>The other two LEDs were implemented by following the truth tables, as displayed below. These are adapted from the Lab 1 Instructions, as linked above.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;"><code>s[1]</code></th>
+<th style="text-align: center;"><code>s[0]</code></th>
+<th style="text-align: center;"><code>led[0]</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+</tbody>
+</table>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;"><code>s[3]</code></th>
+<th style="text-align: center;"><code>s[2]</code></th>
+<th style="text-align: center;"><code>led[1]</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+</tbody>
+</table>
+<p>These tables can effectively be reduced to <code>led[0]</code> being the result of an XOR gate of <code>s[0]</code> and <code>s[1]</code>, and <code>led[1]</code> an AND gate of <code>s[3]</code> and <code>s[2]</code>.</p>
+<p>The seven-segment display was programmed by using combinational logic and case statements in the HDL. Considering the limited current draw of the LED segments, it was necessary to calculate and assign resistors to each segment. Following <span class="math inline">\(V = IR\)</span> and consulting datasheets for the HDSP-511A display, it was determined that these displays would have a forward voltage of between 1.8 to 2.1 V, and current 5 to 20 mA. Following the supplied 3.3 V, the optimal resistance was calculated by: <span class="math display">\[\begin{aligned}
+R &amp;= \frac{V}{I}\\\\
+&amp;= \frac{3.3 - 2}{5*10^{-3}} \\\\
+&amp;= 260\, \Omega
+\end{aligned}\]</span> Considering that the targeted current draw was on the lower end of 5mA, the resistor value was rounded down to 220<span class="math inline">\(\,\Omega\)</span>.</p>
 </section>
 <section id="technical-documentation" class="level2">
 <h2 class="anchored" data-anchor-id="technical-documentation">Technical Documentation</h2>
 <p>The source code for the project can be found in this <a href="https://github.com/mayu-tatsu/e155-lab1">GitHub repository</a>.</p>
+<section id="block-diagram" class="level3">
+<h3 class="anchored" data-anchor-id="block-diagram">Block Diagram</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/lab1-block.jpg" class="img-fluid figure-img"></p>
+<figcaption>Figure 1</figcaption>
+</figure>
+</div>
+<p>Figure 1 depicts the block diagram of the design. The top-level module <code>lab1_mt</code> instantiates two submodules within it, one for the LED logic, <code>leds</code>, and another for the seven segment logic, <code>sev_seg</code>. Within the <code>leds</code> module, the <code>HSOSC</code> module was utilized to create an <code>int_osc</code> clock that was fed into a clock divider (that used a counter).</p>
 </section>
-<section id="block-diagram" class="level1">
-<h1>Block Diagram</h1>
-<p>Figure 1 depicts the block diagram of the design. The top-level module lab1_mt instantiates two submodules within it, one for the LED logic, leds, and another for the seven segment logic, sev_seg.</p>
+<section id="schematic" class="level3">
+<h3 class="anchored" data-anchor-id="schematic">Schematic</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/lab1-schem.jpeg" class="img-fluid figure-img"></p>
+<figcaption>Figure 2</figcaption>
+</figure>
+</div>
+<p>Figure 2 depicts the physical schematic of the design. Internal pullup resistors of 100k<span class="math inline">\(\,\Omega\)</span> were used to ensure that the active low switches and reset button were not floating. The LEDs were each connected to 1k<span class="math inline">\(\,\Omega\)</span> resistors, and each cathode of the seven-segment display was connected to a 220<span class="math inline">\(\,\Omega\)</span> grounded resistor.</p>
 </section>
-<section id="schematic" class="level1">
-<h1>Schematic</h1>
-<p>Figure 2 depicts the physical schematic of the design.</p>
+</section>
 <section id="results-and-discussion" class="level2">
 <h2 class="anchored" data-anchor-id="results-and-discussion">Results and Discussion</h2>
+<section id="video-demonstration" class="level3">
+<h3 class="anchored" data-anchor-id="video-demonstration">Video Demonstration</h3>
+<p>This video below demonstrates all possible configurations of the switches and consequently the values of the LED and seven-segment display.</p>
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/Lf5UC5mMWjU" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+</section>
+<section id="testbench-simulation" class="level3">
+<h3 class="anchored" data-anchor-id="testbench-simulation">Testbench Simulation</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/lab1-mt-waves.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 3</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/leds-waves.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 4</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/sev-segs-waves.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 5</figcaption>
+</figure>
+</div>
+<p>The design met all intended design objectives. Figure 3, 4, and 5 show screenshots of the QuestaSim simulation of the testbenches designed for each module. However, since the 2.4 Hz blinking LED is difficult to test for in the testbench, it was forced to 0 through the command <code>force led[2] 0</code> before running the testbench.</p>
+</section>
+<section id="oscilloscope-trace" class="level3">
+<h3 class="anchored" data-anchor-id="oscilloscope-trace">Oscilloscope Trace</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/oscope-trace.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 6</figcaption>
+</figure>
+</div>
+<p>Figure 6 shows a screenshot of an oscilloscope verifying the 2.42 Hz frequency of the LED.</p>
 </section>
 </section>
-<section id="testbench-simulation" class="level1">
-<h1>Testbench Simulation</h1>
-<p>The design met all intended design objectives. Figure 3, 4, and 5 show screenshots of the QuestaSim simulation of the testbenches designed for each module. However, since the 2.4 Hz blinking LED is difficult to test for in the testbench, it was forced to 0 through the command force led[2] 0 before running the tests.</p>
-<p>Figure 6 shows a screenshot of an oscilloscope hooked</p>
 <section id="conclusion" class="level2">
 <h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>Overall, the design blinked an LED at 2.4 Hz using the onboard high-speed oscillator, changed the state of two other LEDs depending on the input of the four switches, following the logic of a given truth table. The seven segment display was wired and programmed with combinational logic to display a hexadecimal value given the binary input through the same four switches. Roughly 20 hours were spent working on this lab. I spent a couple of hours stuck on some bugs with a digitally controlled oscillator, which I ended up scrapping.</p>
 </section>
 <section id="ai-prototype-summary" class="level2">
 <h2 class="anchored" data-anchor-id="ai-prototype-summary">AI Prototype Summary</h2>
-
-
+<div class="grid">
+<section id="summarized-log" class="level3 g-col-5">
+<h3 class="anchored" data-anchor-id="summarized-log">Summarized Log</h3>
+<blockquote class="blockquote">
+<p><strong>First Prompt:</strong> Write SystemVerilog HDL to leverage the internal high speed oscillator in the Lattice UP5K FPGA and blink an LED at 2 Hz. Take full advantage of SystemVerilog syntax, for example, using logic instead of wire and reg.</p>
+</blockquote>
+<p>This SystemVerilog code provides a solution for blinking an LED at a specific frequency on a Lattice iCE40 UP5K FPGA. … The generated file, <code>led_blinker.sv</code> … instantiates the <code>SB_HFOSC</code> primitive to get the 48 MHz clock signal and then uses an <code>always_ff</code> block to implement a counter that toggles the <code>led</code> output every 12 million clock cycles, achieving the requested 2 Hz blink rate.</p>
+<blockquote class="blockquote">
+<p><strong>Second Prompt:</strong> ERROR: instantiating unknown module SB_HFOSC</p>
+</blockquote>
+<p>…This is a common issue because <code>SB_HFOSC</code> is a vendor-specific primitive for Lattice iCE40 FPGAs, not a standard SystemVerilog module.</p>
+<p>To resolve this, you need to ensure your toolchain is correctly configured for the Lattice iCE40 family. This typically involves:</p>
+<ul>
+<li>Using a synthesis tool like Yosys with the <code>icepack</code> or <code>nextpnr</code> backends.</li>
+<li>Making sure the primitive library files for the iCE40 family are included in your project or synthesis script.</li>
+</ul>
+<blockquote class="blockquote">
+<p><strong>Third Prompt:</strong> Try using HSOSC instead</p>
+</blockquote>
+<p>I have updated the <code>led_blinker.sv</code> file to use the <code>HSOSC</code> module instead of <code>SB_HFOSC</code>.</p>
 </section>
+<section id="reflection" class="level3 g-col-7">
+<h3 class="anchored" data-anchor-id="reflection">Reflection</h3>
+<p>I used Gemini’s 2.5-Flash model for this prototype. Its complete and fixed output, as <a href="https://github.com/mayu-tatsu/e155-lab1/blob/main/llm_test/source/impl_1/lab1_ai.sv">linked here</a>, easily got to a synthesizable state after 3 prompts. The comments for this file were easy to read and explained a lot, if not too much. As a standalone prompt, the LLM was unable to tell what onboard specs and modules were available— it could only guess based on the massive data it’s been trained on that the most average chip would have a <code>SB_HFOSC</code> internal oscillator. Without the context that this FGPA contains a <code>HSOSC</code> module, it makes sense that it was unable to write instantly usable code. However, just by passing in the error and giving the model a possible alternative, it was able to easily modify the first piece of code into a file that synthesized.</p>
+<p>There were no new idioms, at least, for me. It mostly used <code>logic</code>, <code>parameter</code>, and <code>localparam</code>, which I have been familiar with since E85. The instantiation of the resulting <code>HSOSC</code> module was a little less descriptive and seems to have been copied over from the <code>SB_HFOSC</code> instantiation idiom. This makes sense as the model seemed to simply switch out the module name, although it could become a cause of issue for other pairs of modules. The clock divider idiom was as usual. As a result, I would rate this code 8/10.</p>
+<p>In the future, I would probably LLMs to generate SystemVerilog code if I knew what kind of hardware or idioms it would use, and specify that. As an extension of that, I would also need to know what kind of onboard modules and libraries the model could use to fulfill the prompt.</p>
+</section>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/lab1-ai-error.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 7</figcaption>
+</figure>
+</div>
+<p>Figure 7 is the initial error message generated by Radiant’s Lattice LSE Synthesis.</p>
+
+
 </section>
 
 </main> <!-- /main -->
