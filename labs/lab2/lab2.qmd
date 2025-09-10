@@ -31,15 +31,15 @@ The source code for the project can be found in this [GitHub repository](https:/
 
 ### Block Diagram
 
-![Figure 1](images/lab2-block.jpg)
+![Figure 1: Block diagram of the Lab 1 HDL code](images/lab2-block.jpg)
 
-Figure 1 depicts the block diagram of the design. The top-level module `lab2_mt` instantiates two submodules within it, one for the LED logic, `leds`, and another for the seven segment logic, `sev_seg`. Within the `leds` module, the `HSOSC` module was utilized to create an `int_osc` clock that was fed into a clock divider (that used a counter).
+Figure 1 depicts the block diagram of the design. The top-level module `lab2_mt` instantiates four submodules within it. `clk_gen` houses the `clk` generation using the onboard high-speed oscillator through the `HSOSC` module. `sev_seg_sel` uses a clock divider to divide that oscillation down into a much slower frequency of 100 Hz. It creates two opposite, toggling enable signals for each dual seven-segment display. It also chooses which of the input switches to output as `sw`, depending on the enables. `sev_seg` is a module written for Lab 1 that was repurposed for this lab. It takes in some 4-bit binary switch input to output a 7-bit binary LED segment output. Finally, the `led_adder` is the module that takes in the 4-bit binary switch values to output their sum as a 5-bit binary LED value.
 
 ### Schematic
 
-![Figure 2](images/lab2-schem.jpeg)
+![Figure 2](images/lab2-schem.jpg)
 
-Figure 2 depicts the physical schematic of the design. The LEDs were each connected to 1k$\,\Omega$ resistors, and each cathode of the seven-segment display was connected to a 220$\,\Omega$ grounded resistor.
+Figure 2 depicts the physical schematic of the design.
 
 ## Results and Discussion
 
