@@ -8,4 +8,97 @@ categories:
 draft: false
 ---
 
-Nothing to see here just yet.
+## Introduction
+In this lab, the I/O pins on the FPGA board were efficiently utilized to drive a dual-seven segment display and five LEDs. This was achieved in combination with a time multiplexer and PNP transistors, considering the limited amount of usable pins. An HDL program was synthesized and mapped onto the FPGA memory, specifically built in a modular design to make reusability and testability tight and easy.
+
+The goal of the lab was to have two 4-digit binary switches that each controlled a 7-segment display and its sum was presented as a binary 5-digit number through a row of 5 LEDs. The constraint was that there were only so many I/O pins, and so each of the segments of the dual seven-segment displays had to share a pin. 
+
+LINK: [E155 Lab 2 Instructions](https://hmc-e155.github.io/lab/lab2/)
+
+## Design and Testing Methodology
+
+The time-multiplexed dual seven-segment display was controlled by two enable signals and 7 segment values. Due to the shared resources of the wires and pins, it was necessary to oscillate the enable signals and the segment values, which each connected to the cathodes. The oscillation made sure that only one display would be on at one time, with the correct value. The enable signals each connected to the common anode of a seven-segment display, and if one was high, the other was low to ensure only one would be on. While each cathode shared a pin with the same cathode segment of the other display, the enable signals made sure that, again, only one display would be on, and that the number displayed would belong to the right display and switch.
+
+The PNP transistor was utilized to source more current. With only a 8 mA current being sourced from each pin, it was not enough to power each cathode. As a result, the PNP transistors, given a 1 mA current from the base, or the pins, collected from the 3.3V voltage source and pulled a current enough to power the seven-segment display. The 1 mA current at the base was regulated by a resistor of 3.3k $\,\Omega$. This was calculated by $V = IR$, where V = 3.3 V and I = 1 mA, so R = 3.3k. 
+
+The resistors for the green LEDs on the breadboard were calculated by $V = IR$ as well, but this time considering the forward voltage of the green LED, approximated as 2V at a lower current test condition. Considering the voltage drop and the target current of about 2 mA, $V = IR$ reduces to $R = (3.3 - 2) / 0.02  = 0.65$, or roughly 620 $\,\Omega$.
+
+The resistors for the red dual seven-segment display were chosen based on the datasheet [linked here](https://docs.broadcom.com/doc/HDSP-521A-523A-Dual-Digit-General-Purpose-7-Segment-Display-DS). Around a forward current of 5mA, the forward voltage of each LED segment drops down to 1.8V. Knowing that the PNP transitor outputs a voltage of around 2.6 to 2.7 volts at the collector (from this datasheet [linked here](https://hmc-e155.github.io/assets/doc/2N3906-D.pdf)), we can reconfigure Ohm's Law to figure out the appropriate resistor. $R = V/I = (2.7 - 1.8) / 0.002 = 450$, or roughly 470 $\,\Omega$.
+
+## Technical Documentation
+
+The source code for the project can be found in this [GitHub repository](https://github.com/mayu-tatsu/e155-lab2).
+
+### Block Diagram
+
+![Figure 1](images/lab2-block.jpg)
+
+Figure 1 depicts the block diagram of the design. The top-level module `lab2_mt` instantiates two submodules within it, one for the LED logic, `leds`, and another for the seven segment logic, `sev_seg`. Within the `leds` module, the `HSOSC` module was utilized to create an `int_osc` clock that was fed into a clock divider (that used a counter).
+
+### Schematic
+
+![Figure 2](images/lab2-schem.jpeg)
+
+Figure 2 depicts the physical schematic of the design. The LEDs were each connected to 1k$\,\Omega$ resistors, and each cathode of the seven-segment display was connected to a 220$\,\Omega$ grounded resistor.
+
+## Results and Discussion
+
+### Testbench Simulation
+
+![Figure 3: Waveform output of top-level module `lab2_mt` testbench](images/lab2-mt-waves.png)
+
+![Figure 4: Waveform output of module `clk_gen` testbench](images/clk-gen-waves.png)
+
+![Figure 5: Waveform output of module `sev_seg_sel` testbench](images/sev-seg-sel-waves.png)
+
+![Figure 6: Waveform output of module `sev_seg` testbench](images/sev-seg-waves.png)
+
+![Figure 7: Waveform output of module `led_adder` testbench](images/led-adder-waves.png)
+
+The design met all intended design objectives. Figures 3 to 7 show screenshots of the QuestaSim simulation of the testbenches designed for each module. Figures 8 to 12 below show screenshots of the terminal output of the testbench modules, confirming successful simulation and no errors.
+
+The `lab2_mt` top-level module's testbench was the most robust out of all of the The `clk_gen` testbench was a relatively simple design, where it was verified that the clk was off at one point and on the other within a reasonable time frame considering its 6 MHz frequency.
+
+![Figure 8: Terminal output of top-level module `lab2_mt` testbench](images/lab2-mt-output.png)
+
+![Figure 9: Terminal output of module `clk_gen` outptestbenchut](images/clk-gen-output.png)
+
+![Figure 10: Terminal output of module `sev_seg_sel` testbench](images/sev-seg-sel-output.png)
+
+![Figure 11: Terminal output of module `sev_seg` testbench](images/sev-seg-output.png)
+
+![Figure 12: Terminal output of module `led_adder` testbench](images/led-adder-output.png)
+
+## Conclusion
+
+
+
+## AI Prototype Summary
+::: {.grid}
+::: {.g-col-5}
+### Log (not including code)
+
+> **First Prompt:** Write SystemVerilog HDL to time multiplex a single seven segment decoder (that decodes from four bits to a common anode seven segment display) to decode two sets of input bits and drive two sets of seven output bits.
+
+You can time multiplex a single seven-segment decoder to drive two separate displays by rapidly switching between them. This approach uses a single decoder and associated circuitry to display different information on each display in an alternating fashion, relying on the persistence of human vision to create the illusion that both are lit simultaneously.
+
+The SystemVerilog module `seven_seg_mux` implements a time multiplexer for two common anode seven-segment displays. It takes two 4-bit inputs (`in_0`, `in_1`), a clock signal (`clk`), and a reset signal (`rst_n`). It outputs the 7-bit decoded signal (`anode_out`) and a 2-bit anode select signal (`anode_sel`).
+
+> **Second Prompt:** Write SystemVerilog HDL to time multiplex a single seven segment decoder (that decodes from four bits to a common anode seven segment display) to decode two sets of input bits and drive two sets of seven output bits. Use the seven segment decoder and oscillator provided in the attached files.
+
+I can certainly help with that. Here is the SystemVerilog HDL to time multiplex a single seven-segment decoder. This module utilizes the `sev_seg` and `leds` modules you provided to drive two displays with different inputs. The time multiplexing is achieved by using a high-speed oscillator to rapidly switch between the two inputs.
+
+This SystemVerilog file, `seven_seg_mux.sv`, contains a top-level module that demonstrates the time multiplexing. It instantiates the `sev_seg` module to handle the decoding and uses a clock signal from the `leds` module to rapidly switch between `s1` and `s2`. It then drives the `seg` outputs and the an (anode) outputs to select which display is active at any given time.
+
+:::
+::: {.g-col-7}
+### Reflection
+
+I used Gemini's 2.5-Flash model for this prototype. Its complete and fixed output for the first prompt is as [linked here](https://github.com/mayu-tatsu/e155-lab2/tree/main/lab2_llm_1/source/impl_1). It was synthesizable from the first prompt, where the two modules, `seven_seg_mux` and `seven_seg_decoder`, were provided and worked in sync with each other.
+
+There were no new idioms, at least, for me. It mostly used `logic`, `parameter`, and `localparam`, which I have been familiar with since E85. The instantiation of the resulting `HSOSC` module was a little less descriptive and seems to have been copied over from the `SB_HFOSC` instantiation idiom. This makes sense as the model seemed to simply switch out the module name, although it could become a cause of issue for other pairs of modules. The clock divider idiom was as usual. As a result, I would rate this code 8/10. 
+
+In the future, I would probably LLMs to generate SystemVerilog code if I knew what kind of hardware or idioms it would use, and specify that. As an extension of that, I would also need to know what kind of onboard modules and libraries the model could use to fulfill the prompt.
+
+:::
+:::
