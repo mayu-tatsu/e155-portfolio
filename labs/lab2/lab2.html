@@ -242,7 +242,7 @@ window.Quarto = {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="images/lab2-schem.jpg" class="img-fluid figure-img"></p>
-<figcaption>Figure 2: Schematic of the external hardware used for Lab 2 design</figcaption>
+<figcaption>Figure 2: Schematic of the external hardware used for Lab 2 design; doesn’t have the correct resistor values on it despite multiple updates and the right jpg being in the images folder.</figcaption>
 </figure>
 </div>
 <p>Figure 2 depicts the physical schematic of the design. The I/O pins were maxed out, with every single one of them connected to something. Two 4-digit DIP switches were used as the input for the program, with one soldered onto the PCB and another wired into the breadbord. A green LED each connected to an I/O pin, wired to the breadboard, and connected with a 620 <span class="math inline">\(\,\Omega\)</span> current-limiting resistor. The reset was routed to a button on the board. Each cathode segment of the dual seven-segment display was connected to a pin, and the two common anodes of the display were connected from a source-generating PNP transistor, which were also connected to a pin each on the FPGA. Those pins were enabled and disabled by the <code>seg1en</code> and <code>seg2en</code> enable signals.</p>
