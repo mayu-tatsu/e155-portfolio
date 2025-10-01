@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Mayu Tatsumi">
-<meta name="dcterms.date" content="2025-09-25">
+<meta name="dcterms.date" content="2025-10-01">
 <meta name="description" content="Lab 4">
 
 <title>Lab 4: Digital Audio – E155 Portfolio</title>
@@ -71,6 +71,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -119,8 +148,29 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#design-and-testing-methodology" id="toc-design-and-testing-methodology" class="nav-link" data-scroll-target="#design-and-testing-methodology">Design and Testing Methodology</a></li>
+  <li><a href="#technical-documentation" id="toc-technical-documentation" class="nav-link" data-scroll-target="#technical-documentation">Technical Documentation</a>
+  <ul class="collapse">
+  <li><a href="#schematic" id="toc-schematic" class="nav-link" data-scroll-target="#schematic">Schematic</a></li>
+  </ul></li>
+  <li><a href="#results-and-discussion" id="toc-results-and-discussion" class="nav-link" data-scroll-target="#results-and-discussion">Results and Discussion</a>
+  <ul class="collapse">
+  <li><a href="#oscilloscope" id="toc-oscilloscope" class="nav-link" data-scroll-target="#oscilloscope">Oscilloscope</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  <li><a href="#ai-prototype-summary" id="toc-ai-prototype-summary" class="nav-link" data-scroll-target="#ai-prototype-summary">AI Prototype Summary</a>
+  <ul class="collapse">
+  <li><a href="#abriged-chat-log" id="toc-abriged-chat-log" class="nav-link" data-scroll-target="#abriged-chat-log">Abriged Chat Log</a></li>
+  <li><a href="#reflection" id="toc-reflection" class="nav-link" data-scroll-target="#reflection">Reflection</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -152,7 +202,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 25, 2025</p>
+      <p class="date">October 1, 2025</p>
     </div>
   </div>
   
@@ -164,9 +214,89 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Nothing to see here just yet.</p>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>In this lab, we utilized the STM32L432KC MCU and a speaker to play a set of predetermined notes. This was done by creating our own drivers from scratch, making sure we configure and instantiate the utilizing two onboard timers. Both had the same system clock input of 80MHz, but each was configured so that they would count up to various values. One timer generated a square wave that output to a GPIO pin, therefore creating sounds out of the frequency, and the other created delays that changed the length of each note. There was some circuitry involved, where we hooked up an LM386 audio power amplifier to a speaker, which was controlled by both the MCU and a potentiometer.</p>
+<p>LINK: <a href="https://hmc-e155.github.io/lab/lab4/">E155 Lab 4 Instructions</a></p>
+</section>
+<section id="design-and-testing-methodology" class="level2">
+<h2 class="anchored" data-anchor-id="design-and-testing-methodology">Design and Testing Methodology</h2>
+<p>Timer setup and initialization was done by a provided driver, where the multiple speed internal (MSI) clock, driven by an RC oscillator, input the onboard phase-locked loop (PLL). The maximum value of 80 MHz was chosen to drive both <code>TIM15</code> and <code>TIM16</code>, some general-purpose timers. <code>TIM16</code> generated a PWM to a GPIO, specifically pin A6, and <code>TIM15</code> ensured the delay in between each change in note was accurate.</p>
+<p>Prescalar calculations were conducted via this <a href="https://docs.google.com/spreadsheets/d/1xsVYfNPvEk6cIlUN48iN7crt9nA_SKiWPjaxsmkV04I/edit?usp=sharing">Google Spreadsheet</a>, where I found a combination of <code>PSC</code> and <code>ARR</code> values that correctly fit each timer’s needs. <code>TIM15</code>, as the delay clock, needed a maximum frequency of 1Hz and a minimum frequency of 500 Hz to be able to hold out for the longest duration. <code>TIM16</code> had to drive a minimum of 220 Hz and a maximum of 1000 Hz to produce the correct frequencies of sound, as given by the spec sheet. <code>PSC</code> by design needs to stay constant for a timer no matter what. To make sure that <code>ARR</code> stayed within its register of up to 16 bits, some tweaking was involved. By following the equations <span class="math inline">\(f_{CNT} = \frac{SYSCLK}{PSC + 1}\)</span> and <span class="math inline">\(f = \frac{f_{CNT}}{ARR + 1}\)</span>, it was possible to create a larger <code>PSC</code> of 4000 for <code>TIM15</code> and a small <code>PSC</code> value of 20 for <code>TIM16</code>, which both suited <code>ARR</code> values to stay within the range.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/lab4-psc.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 1: Prescaler Calculations</figcaption>
+</figure>
+</div>
+</section>
+<section id="technical-documentation" class="level2">
+<h2 class="anchored" data-anchor-id="technical-documentation">Technical Documentation</h2>
+<p>The source code for the project can be found in this <a href="https://github.com/mayu-tatsu/e155-lab4">GitHub repository</a>.</p>
+<section id="schematic" class="level3">
+<h3 class="anchored" data-anchor-id="schematic">Schematic</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/lab4-schem.jpg" class="img-fluid figure-img"></p>
+<figcaption>Figure 2: Schematic</figcaption>
+</figure>
+</div>
+<p>Figure 2 depicts the physical schematic of the design. The design and components for the LM386 circuit was given by an example from its datasheet, specifically its Gain 50 circuit at Section 9.2.3.</p>
+</section>
+</section>
+<section id="results-and-discussion" class="level2">
+<h2 class="anchored" data-anchor-id="results-and-discussion">Results and Discussion</h2>
+<section id="oscilloscope" class="level3">
+<h3 class="anchored" data-anchor-id="oscilloscope">Oscilloscope</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/lab4-oscope.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 3: Oscilloscope Trace for 5 Hz, the frequency of C5</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/lab4-oscope-220.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 4: Oscilloscope Trace for 220Hz</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/lab4-oscope-1000.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 5: Oscilloscope Trace for 1000Hz</figcaption>
+</figure>
+</div>
+<p>Attached are three oscilloscope traces displaying correct frequency behavior. Figure 3 is the trace shown when a note of C5 is being played as a part of Fur Elise. Figure 4 and 5 demonstrate the circuit’s propensity to generate at its minimum and maximum specified frequencies, at 220 Hz and 100 0Hz respectively.</p>
+<p>To determine the notes’ error range, we can once again take a look at the PSC and ARR values specified at <code>TIM16</code>, which had a PWM and generated a square wave to create the pitch of each note. As its <code>PSC</code> was determined to be 20, we know that its <span class="math inline">\(f_{CNT}\)</span>, or counter clock frequency, must be <span class="math inline">\(80,000,000 / (20+1) = 3809523.8\)</span>. However, these values are truncated as a result of C convention, which effectively means that the utilized counter clock frequency is <span class="math inline">\(f_{CNT} = 3809523\)</span>. We can determine some <code>ARR</code> values for the minimum and maximum notes playable (220 Hz and 1000 Hz): <span class="math inline">\(ARR_{min} = \frac{3809523}{220} - 1 = 17315\)</span>, <span class="math inline">\(ARR_{max} = \frac{3809523}{1000} - 1 = 3808\)</span>. Via these values,we can see how the <code>PSC</code> and <code>ARR</code> values come to output a real frequency. <span class="math inline">\(f_{min} = \frac{3809523.8}{17315 + 1} = 220.00021945\)</span> and <span class="math inline">\(f_{max} = \frac{3809523.8}{3808 + 1} = 1000.13751641\)</span>. By normal error equation, we get that <span class="math inline">\(ERR_{min} = \frac{220.00021945 - 220}{220} = 0.0000009975\)</span> and <span class="math inline">\(ERR_{max} = \frac{1000.13751641 - 1000}{1000} = 0.00013751641\)</span>, both of which are within 1% error bounds.</p>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>The design made in this lab successfully operated a speaker, creating sounds that were discernable to the ear. The Fur Elise song and the score for Superman were used. Driver files were created from scratch, where timers were instantiated to take in a system clock input, and loaded different counter values to generate a square wave and durations at various frequencies. Circuitry involving the LM386 audio amplifier and potentiometer were physically created as well. Total hours worked: 12 hours.</p>
+</section>
+<section id="ai-prototype-summary" class="level2">
+<h2 class="anchored" data-anchor-id="ai-prototype-summary">AI Prototype Summary</h2>
+<section id="abriged-chat-log" class="level3">
+<h3 class="anchored" data-anchor-id="abriged-chat-log">Abriged Chat Log</h3>
+<blockquote class="blockquote">
+<p><strong>First Prompt:</strong> What timers should I use on the STM32L432KC to generate frequencies ranging from 220Hz to 1kHz? What’s the best choice of timer if I want to easily connect it to a GPIO pin? What formulae are relevant, and what registers need to be set to configure them properly?</p>
+</blockquote>
+<p>Great question — let’s walk through this systematically for the STM32L432KC (Cortex-M4, L4 series)…</p>
+<p>Summary: - Use TIM2 (32-bit, general-purpose, easy GPIO output on PA0/PA5/PA15). - <span class="math inline">\(f_{OUT} = \frac{f_{TIM}}{(PSC+1)(ARR+1)}\)</span> - Registers: PSC, ARR, CCRn, CCMRx, CCER, CR1. - Choose PSC=79 → gives 1 MHz timer tick → then ARR = 999–4544 gives 1 kHz–220 Hz.</p>
+<blockquote class="blockquote">
+<p><strong>Second Prompt:</strong> Using this reference manual of the MCU as context, what timers should I use on the STM32L432KC to generate frequencies ranging from 220Hz to 1kHz? What’s the best choice of timer if I want to easily connect it to a GPIO pin? What formulae are relevant, and what registers need to be set to configure them properly?</p>
+</blockquote>
+<p>I dug into the STM32L432KC reference manual you provided. Here’s how it breaks down for generating frequencies in the 220 Hz – 1 kHz range: …</p>
+<p>Summary: - Use TIM2 (best for simple frequency generation to a GPIO). - Formula: <span class="math inline">\(f_{OUT} = \frac{f_{TIM}}{(PSC+1)(ARR+1)}\)</span> - Configure PSC, ARR, CCRy, CCMRx, CCER, CR1. - Map timer channel to a GPIO AF in GPIOx_MODER + GPIOx_AFR.</p>
+</section>
+<section id="reflection" class="level3">
+<h3 class="anchored" data-anchor-id="reflection">Reflection</h3>
+<p>I used ChatGPT’s GPT-4 model for this prototype. Both prompts recommended <code>TIM1</code> and <code>TIM2</code> for advanced-control PWM generation. Both made sure to enable the GPIO pins at alternate function. The one prompted with the reference manual declined to mention the <code>BDTR</code> flag. Neither reset the <code>CNT</code> register, which may or may not be necessary for implementation. However, overall, the setup for initialization seems fine and similar to what I had. It isn’t able to determine exactly which bit in the register or what values to change them to, but it is able to explain it clearly enough so that if you go into the datasheet, it is easy enough to find and code it.</p>
+<p>The <code>PSC</code> values were accurate enough, since the LLM was able to correctly deduce that a 80MHz clock was input for the timers. Neither had the same <code>ARR</code> values, however. I think the model easily had accurate results even without the reference manual as the information for STM32L432KC is widely available online. I would rate these responses both a 9/10, since I think they are both probably really useful to know and can easily help implement. There’s still a need to look at the datasheet, which is probably better honestly since it forces users to understand exactly what they are doing.</p>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
