@@ -2,10 +2,79 @@
 title: "Lab 4: Digital Audio"
 description: "Lab 4"
 author: "Mayu Tatsumi"
-date: "9/25/25"
+date: "10/1/25"
 categories:
   - labreport
 draft: false
 ---
 
-Nothing to see here just yet.
+## Introduction
+In this lab, we utilized the STM32L432KC MCU and a speaker to play a set of predetermined notes. This was done by creating our own drivers from scratch, making sure we configure and instantiate the utilizing two onboard timers. Both had the same system clock input of 80MHz, but each was configured so that they would count up to various values. One timer generated a square wave that output to a GPIO pin, therefore creating sounds out of the frequency, and the other created delays that changed the length of each note. There was some circuitry involved, where we hooked up an LM386 audio power amplifier to a speaker, which was controlled by both the MCU and a potentiometer.
+
+LINK: [E155 Lab 4 Instructions](https://hmc-e155.github.io/lab/lab4/)
+
+## Design and Testing Methodology
+
+Timer setup and initialization was done by a provided driver, where the multiple speed internal (MSI) clock, driven by an RC oscillator, input the onboard phase-locked loop (PLL). The maximum value of 80 MHz was chosen to drive both `TIM15` and `TIM16`, some general-purpose timers. `TIM16` generated a PWM to a GPIO, specifically pin A6, and `TIM15` ensured the delay in between each change in note was accurate.
+
+Prescalar calculations were conducted via this [Google Spreadsheet](https://docs.google.com/spreadsheets/d/1xsVYfNPvEk6cIlUN48iN7crt9nA_SKiWPjaxsmkV04I/edit?usp=sharing), where I found a combination of `PSC` and `ARR` values that correctly fit each timer's needs. `TIM15`, as the delay clock, needed a maximum frequency of 1Hz and a minimum frequency of 500 Hz to be able to hold out for the longest duration. `TIM16` had to drive a minimum of 220 Hz and a maximum of 1000 Hz to produce the correct frequencies of sound, as given by the spec sheet. `PSC` by design needs to stay constant for a timer no matter what. To make sure that `ARR` stayed within its register of up to 16 bits, some tweaking was involved. By following the equations $f_{CNT} = \frac{SYSCLK}{PSC + 1}$ and $f = \frac{f_{CNT}}{ARR + 1}$, it was possible to create a larger `PSC` of 4000 for `TIM15` and a small `PSC` value of 20 for `TIM16`, which both suited `ARR` values to stay within the range.
+
+![Figure 1: Prescaler Calculations](images/lab4-psc.png)
+
+## Technical Documentation
+
+The source code for the project can be found in this [GitHub repository](https://github.com/mayu-tatsu/e155-lab4).
+
+### Schematic
+
+![Figure 2: Schematic](images/lab4-schem.jpg)
+
+Figure 2 depicts the physical schematic of the design. The design and components for the LM386 circuit was given by an example from its datasheet, specifically its Gain 50 circuit at Section 9.2.3.
+
+## Results and Discussion
+
+### Oscilloscope
+
+![Figure 3: Oscilloscope Trace for 5 Hz, the frequency of C5](images/lab4-oscope.png)
+
+![Figure 4: Oscilloscope Trace for 220Hz](images/lab4-oscope-220.png)
+
+![Figure 5: Oscilloscope Trace for 1000Hz](images/lab4-oscope-1000.png)
+
+Attached are three oscilloscope traces displaying correct frequency behavior. Figure 3 is the trace shown when a note of C5 is being played as a part of Fur Elise. Figure 4 and 5 demonstrate the circuit's propensity to generate at its minimum and maximum specified frequencies, at 220 Hz and 100 0Hz respectively.
+
+To determine the notes' error range, we can once again take a look at the PSC and ARR values specified at `TIM16`, which had a PWM and generated a square wave to create the pitch of each note. As its `PSC` was determined to be 20, we know that its $f_{CNT}$, or counter clock frequency, must be $80,000,000 / (20+1) = 3809523.8$. However, these values are truncated as a result of C convention, which effectively means that the utilized counter clock frequency is $f_{CNT} = 3809523$. We can determine some `ARR` values for the minimum and maximum notes playable (220 Hz and 1000 Hz): $ARR_{min} = \frac{3809523}{220} - 1 = 17315$, $ARR_{max} = \frac{3809523}{1000} - 1 = 3808$. Via these values,we can see how the `PSC` and `ARR` values come to output a real frequency. $f_{min} = \frac{3809523.8}{17315 + 1} = 220.00021945$ and $f_{max} = \frac{3809523.8}{3808 + 1} = 1000.13751641$. By normal error equation, we get that $ERR_{min} = \frac{220.00021945 - 220}{220} = 0.0000009975$ and $ERR_{max} = \frac{1000.13751641 - 1000}{1000} = 0.00013751641$, both of which are within 1% error bounds.
+
+## Conclusion
+
+The design made in this lab successfully operated a speaker, creating sounds that were discernable to the ear. The Fur Elise song and the score for Superman were used. Driver files were created from scratch, where timers were instantiated to take in a system clock input, and loaded different counter values to generate a square wave and durations at various frequencies. Circuitry involving the LM386 audio amplifier and potentiometer were physically created as well. Total hours worked: 12 hours.
+
+## AI Prototype Summary
+
+### Abriged Chat Log
+
+> **First Prompt:** What timers should I use on the STM32L432KC to generate frequencies ranging from 220Hz to 1kHz? What’s the best choice of timer if I want to easily connect it to a GPIO pin? What formulae are relevant, and what registers need to be set to configure them properly?
+
+Great question — let’s walk through this systematically for the STM32L432KC (Cortex-M4, L4 series)...
+
+Summary:
+- Use TIM2 (32-bit, general-purpose, easy GPIO output on PA0/PA5/PA15).
+- $f_{OUT} = \frac{f_{TIM}}{(PSC+1)(ARR+1)}$
+- Registers: PSC, ARR, CCRn, CCMRx, CCER, CR1.
+- Choose PSC=79 → gives 1 MHz timer tick → then ARR = 999–4544 gives 1 kHz–220 Hz.
+
+> **Second Prompt:** Using this reference manual of the MCU as context, what timers should I use on the STM32L432KC to generate frequencies ranging from 220Hz to 1kHz? What’s the best choice of timer if I want to easily connect it to a GPIO pin? What formulae are relevant, and what registers need to be set to configure them properly?
+
+I dug into the STM32L432KC reference manual you provided. Here’s how it breaks down for generating frequencies in the 220 Hz – 1 kHz range: ...
+
+Summary:
+- Use TIM2 (best for simple frequency generation to a GPIO).
+- Formula: $f_{OUT} = \frac{f_{TIM}}{(PSC+1)(ARR+1)}$
+- Configure PSC, ARR, CCRy, CCMRx, CCER, CR1.
+- Map timer channel to a GPIO AF in GPIOx_MODER + GPIOx_AFR.
+
+### Reflection
+
+I used ChatGPT's GPT-4 model for this prototype. Both prompts recommended `TIM1` and `TIM2` for advanced-control PWM generation. Both made sure to enable the GPIO pins at alternate function. The one prompted with the reference manual declined to mention the `BDTR` flag. Neither reset the `CNT` register, which may or may not be necessary for implementation. However, overall, the setup for initialization seems fine and similar to what I had. It isn't able to determine exactly which bit in the register or what values to change them to, but it is able to explain it clearly enough so that if you go into the datasheet, it is easy enough to find and code it. 
+
+The `PSC` values were accurate enough, since the LLM was able to correctly deduce that a 80MHz clock was input for the timers. Neither had the same `ARR` values, however. I think the model easily had accurate results even without the reference manual as the information for STM32L432KC is widely available online. I would rate these responses both a 9/10, since I think they are both probably really useful to know and can easily help implement. There's still a need to look at the datasheet, which is probably better honestly since it forces  users to understand exactly what they are doing.
