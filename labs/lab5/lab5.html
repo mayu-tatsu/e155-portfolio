@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Mayu Tatsumi">
-<meta name="dcterms.date" content="2025-10-02">
+<meta name="dcterms.date" content="2025-10-08">
 <meta name="description" content="Lab 5">
 
 <title>Lab 5: Interrupts – E155 Portfolio</title>
@@ -71,6 +71,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -119,8 +148,31 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#design-and-testing-methodology" id="toc-design-and-testing-methodology" class="nav-link" data-scroll-target="#design-and-testing-methodology">Design and Testing Methodology</a></li>
+  <li><a href="#technical-documentation" id="toc-technical-documentation" class="nav-link" data-scroll-target="#technical-documentation">Technical Documentation</a>
+  <ul class="collapse">
+  <li><a href="#flow-chart" id="toc-flow-chart" class="nav-link" data-scroll-target="#flow-chart">Flow Chart</a></li>
+  <li><a href="#schematic" id="toc-schematic" class="nav-link" data-scroll-target="#schematic">Schematic</a></li>
+  </ul></li>
+  <li><a href="#results-and-discussion" id="toc-results-and-discussion" class="nav-link" data-scroll-target="#results-and-discussion">Results and Discussion</a>
+  <ul class="collapse">
+  <li><a href="#oscilloscope" id="toc-oscilloscope" class="nav-link" data-scroll-target="#oscilloscope">Oscilloscope</a></li>
+  <li><a href="#manual-polling" id="toc-manual-polling" class="nav-link" data-scroll-target="#manual-polling">Manual Polling</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  <li><a href="#ai-prototype-summary" id="toc-ai-prototype-summary" class="nav-link" data-scroll-target="#ai-prototype-summary">AI Prototype Summary</a>
+  <ul class="collapse">
+  <li><a href="#abriged-chat-log" id="toc-abriged-chat-log" class="nav-link" data-scroll-target="#abriged-chat-log">Abriged Chat Log</a></li>
+  <li><a href="#reflection" id="toc-reflection" class="nav-link" data-scroll-target="#reflection">Reflection</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -152,7 +204,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 2, 2025</p>
+      <p class="date">October 8, 2025</p>
     </div>
   </div>
   
@@ -164,9 +216,129 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Nothing to see here just yet.</p>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>In this lab, we utilized the STM32L432KC MCU and a motor with a quadrature encoder (25GA-370) to determine the speed and direction of the revolution of the motor. This was done by utilizing CMSIS’ library of macros and structs created for the STM32L423xx chip, and by initializing and coding our own interrupts. We had two inputs at the GPIOs, one for the A encoder and one for the B encoder. The interrupts were triggered at both rising and falling edges of both signals, one for each encoder signal. The interrupts were designed to save timestamps, and with some logic, saved the number of edges since some last time, and was able to get the revolution and direction of the motor as it spun.</p>
+<p>Lab Manual: <a href="https://hmc-e155.github.io/lab/lab5/">E155 Lab 5 Instructions</a></p>
+</section>
+<section id="design-and-testing-methodology" class="level2">
+<h2 class="anchored" data-anchor-id="design-and-testing-methodology">Design and Testing Methodology</h2>
+<p>Timer drivers from Lab 4 were utilized for reusability and modularity, but with the newly approved access to CMSIS and their prewritten library, it was necessary to delete all personalized structs and base addresses, along with some constants. Two timers were initialized to 1. record timestamps at which each pulse cycle’s edges were triggering the interrupts and 2. create delays between each velocity update with a <code>PSC</code> of 4000, since we were aiming for an update frequency of 1 Hz. Initialization of an interrupt was done by registering a route between GPIO and EXTI interrupt, unmasking the interrupt line, enabling both rising and falling triggers, and enabling the correct NVIC interrupt channel.</p>
+<p>Inputs for the encoder signals were <code>PA8</code> for encoder A and <code>PA10</code> for encoder B. Both were part of GPIO Port A and as a part of the later GPIO pins, shared handlers across multiple pins. As a result, it was important to validate that it was that specific EXTI line that triggered the interrupt. The interrupts were each defined in <code>EXTI9_5_IRQHandler</code> and <code>EXTI15_10_IRQHandler</code> as each pin, <code>PA8</code> and <code>PA10</code>, were each within the shared lines 5-9 and 10-15.</p>
+<p>Since this specific motor outputs 408 pulses per revolution (PPR) and we have a resolution of 4 edges per cycle from two signals, we can figure out the rotational velocity of the motor by counting the number of edges. We used the equation <code>V = edge_count / (4 * 408)</code>. The direction was determined by comparing the states of the signals at each rising and falling edge, and came up with some logic.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/lab5-dir.jpg" class="img-fluid figure-img"></p>
+<figcaption>Figure 1: Direction logic</figcaption>
+</figure>
+</div>
+</section>
+<section id="technical-documentation" class="level2">
+<h2 class="anchored" data-anchor-id="technical-documentation">Technical Documentation</h2>
+<p>The source code for the project can be found in this <a href="https://github.com/mayu-tatsu/e155-lab5">GitHub repository</a>.</p>
+<section id="flow-chart" class="level3">
+<h3 class="anchored" data-anchor-id="flow-chart">Flow Chart</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/lab5-flow.jpg" class="img-fluid figure-img"></p>
+<figcaption>Figure 2: Flow Chart</figcaption>
+</figure>
+</div>
+<p>Figure 2 depicts the flow chart of the interrupt handler design on the MCU in conjunction with the timing with the rest of the program.</p>
+</section>
+<section id="schematic" class="level3">
+<h3 class="anchored" data-anchor-id="schematic">Schematic</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/lab5-schem.jpg" class="img-fluid figure-img"></p>
+<figcaption>Figure 3: Schematic</figcaption>
+</figure>
+</div>
+<p>Figure 3 depicts the physical schematic of the design.</p>
+</section>
+</section>
+<section id="results-and-discussion" class="level2">
+<h2 class="anchored" data-anchor-id="results-and-discussion">Results and Discussion</h2>
+<section id="oscilloscope" class="level3">
+<h3 class="anchored" data-anchor-id="oscilloscope">Oscilloscope</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/lab5-oscope-25.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 4: Oscilloscope Trace for 2.52 V</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/lab5-oscope-6.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 5: Oscilloscope Trace for 6.02 V</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/lab5-oscope-10.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 6: Oscilloscope Trace for 9.97 V</figcaption>
+</figure>
+</div>
+<p>Attached are three oscilloscope traces displaying encoder signal A’s output when input with 2.52V, 6.02V, and 9.97V. By manually counting these edges, we can verify the velocity output at a specific time by comparing the hand-calculated velocity with the output velocity at the same voltage.</p>
+<p>2.52 V had a 232Hz encoder output as shown on the oscilloscope, which could be converted to a <span class="math inline">\(232 / 408 = 0.568\)</span> rev/s calculation by hand. The program itself detected <span class="math inline">\(0.569\)</span> rev/s. 8.15V hand-calculated was <span class="math inline">\(577 / 408 = 1.414\)</span> rev/s and <span class="math inline">\(1.418\)</span> rev/s detected. 9.93V: = <span class="math inline">\(971 / 408 = 2.380\)</span> rev/s and <span class="math inline">\(2.380\)</span> rev/s. Errors were minimal, usually to the thousandth degree, and all outputs were expected.</p>
+</section>
+<section id="manual-polling" class="level3">
+<h3 class="anchored" data-anchor-id="manual-polling">Manual Polling</h3>
+<p>I did manual polling by removing the delay factor from the loop and calling the same update velocity function in another while loop. I toggled a separate output pin whenever the update velocity function to check how fast it would toggle, as in how fast the program would be able to manually function without detecting edges with interrupts. From Figure 7 below, I detected that that occurs at a 330 Hz frequency, which is much slower than around the 408 * 2.4 Hz that occurs at an input voltage of 10V.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/lab5-polling.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 7: Oscope trace of polling</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>The design made in this lab successfully read the velocity of a motor by utilizing interrupts and detecting the maximum number of encoder signal edges possible for the highest resolution possible. Total hours worked: 12 hours.</p>
+</section>
+<section id="ai-prototype-summary" class="level2">
+<h2 class="anchored" data-anchor-id="ai-prototype-summary">AI Prototype Summary</h2>
+<section id="abriged-chat-log" class="level3">
+<h3 class="anchored" data-anchor-id="abriged-chat-log">Abriged Chat Log</h3>
+<blockquote class="blockquote">
+<p><strong>Prompt:</strong> What timers should I use on the STM32L432KC to generate frequencies ranging from 220Hz to 1kHz? What’s the best choice of timer if I want to easily connect it to a GPIO pin? What formulae are relevant, and what registers need to be set to configure them properly?</p>
+</blockquote>
+<ol type="1">
+<li>Recommended Pin Connections: You should connect your encoder channels to a General-Purpose Timer (GPT) that supports encoder interface mode. TIM2 is a 32-bit timer available on the STM32L432KC, making it an excellent choice.</li>
+</ol>
+<ul>
+<li>Channel A PA0 TIM2_CH1 (Alternate Function) Encoder Phase 1 Input</li>
+<li>Channel B PA1 TIM2_CH2 (Alternate Function) Encoder Phase 2 Input</li>
+<li>Index (Z) PB5 EXTI Line 5 Zero-position reference (Optional)</li>
+</ul>
+<p>Encoder Channels A and B are connected to the Timer peripherals (PA0/PA1). The Index (Z) Pulse, if available, is best handled by a regular External Interrupt (EXTI), as it only fires once per revolution. We will use PB5 as an example.</p>
+<ol start="2" type="1">
+<li>Timer Setup (Conceptual Configuration): Before the interrupt handler can run, you must configure the peripherals. This typically involves setting GPIO Alternate Functions, enabling the timer clock, and setting the timer mode.</li>
+</ol>
+<p>I will provide a conceptual C code snippet showing the key register configuration steps, assuming a CMSIS (bare-metal) style, as this is closest to the hardware registers you’d manipulate.</p>
+<p>(Code attached)</p>
+<ol start="3" type="1">
+<li>Interrupt Handler (TIM2_IRQHandler): The main logic for the quadrature encoder is to track the number of times the hardware counter overflows (goes from 0xFFFF to 0) or underflows (goes from 0 to 0xFFFF). This allows you to track a total count far exceeding the 16-bit limit of the counter register (2^16 = 65,536 pulses).</li>
+</ol>
+<p>(Code attached)</p>
+<p>How the Timer Encoder Mode Works</p>
+<ul>
+<li>Hardware Counting: The hardware timer (TIM2) constantly monitors the signals on PA0 (A) and PA1 (B). Based on the phase difference, it automatically increments or decrements the TIM2-&gt;CNT (Counter) register.</li>
+<li>Range Management: The counter is configured to run from 0 to 0xFFFF (65,535).</li>
+<li>Interrupt Trigger: When the count goes from 0xFFFF→0 (overflow, positive direction) or 0→0xFFFF (underflow, negative direction), the Update Interrupt Flag (UIF) is set, triggering the TIM2_IRQHandler.</li>
+<li>Software Extension: Inside the interrupt, we check the hardware direction flag (TIM2-&gt;CR1_DIR) and adjust the 32-bit software variable (total_encoder_pulses) by ±65,536.</li>
+<li>Final Position: Your true, overall position is the sum of the software offset (total_encoder_pulses) and the current hardware count (TIM2-&gt;CNT).</li>
+<li>Total&nbsp;Pulses=total_encoder_pulses+TIM2→CNT</li>
+</ul>
+</section>
+<section id="reflection" class="level3">
+<h3 class="anchored" data-anchor-id="reflection">Reflection</h3>
+<p>I used Gemini’s 2.5-Flash model for this prototype. The two files provided built instantly, but had a difficult time integrating into the workflow that I had built. I think it made use of the CMSIS structs and macros well, but without the context of some of the GPIO pins I used, it needed some debugging to tweak everything so it worked. In the end, the direction stuff worked after some debugging but the revolutions was multiplied by a few terms up. I think the bot miscalculated some of the values it added and negated as underflow or overflow. But, the TIM initialization is very standard and easy to find off the internet, which is why it was probably easier for the LLM to fish that part out.</p>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

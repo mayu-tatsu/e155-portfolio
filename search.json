@@ -74,7 +74,49 @@
     "href": "labs/lab5/lab5.html",
     "title": "Lab 5: Interrupts",
     "section": "",
-    "text": "Nothing to see here just yet."
+    "text": "In this lab, we utilized the STM32L432KC MCU and a motor with a quadrature encoder (25GA-370) to determine the speed and direction of the revolution of the motor. This was done by utilizing CMSIS’ library of macros and structs created for the STM32L423xx chip, and by initializing and coding our own interrupts. We had two inputs at the GPIOs, one for the A encoder and one for the B encoder. The interrupts were triggered at both rising and falling edges of both signals, one for each encoder signal. The interrupts were designed to save timestamps, and with some logic, saved the number of edges since some last time, and was able to get the revolution and direction of the motor as it spun.\nLab Manual: E155 Lab 5 Instructions"
+  },
+  {
+    "objectID": "labs/lab5/lab5.html#introduction",
+    "href": "labs/lab5/lab5.html#introduction",
+    "title": "Lab 5: Interrupts",
+    "section": "",
+    "text": "In this lab, we utilized the STM32L432KC MCU and a motor with a quadrature encoder (25GA-370) to determine the speed and direction of the revolution of the motor. This was done by utilizing CMSIS’ library of macros and structs created for the STM32L423xx chip, and by initializing and coding our own interrupts. We had two inputs at the GPIOs, one for the A encoder and one for the B encoder. The interrupts were triggered at both rising and falling edges of both signals, one for each encoder signal. The interrupts were designed to save timestamps, and with some logic, saved the number of edges since some last time, and was able to get the revolution and direction of the motor as it spun.\nLab Manual: E155 Lab 5 Instructions"
+  },
+  {
+    "objectID": "labs/lab5/lab5.html#design-and-testing-methodology",
+    "href": "labs/lab5/lab5.html#design-and-testing-methodology",
+    "title": "Lab 5: Interrupts",
+    "section": "Design and Testing Methodology",
+    "text": "Design and Testing Methodology\nTimer drivers from Lab 4 were utilized for reusability and modularity, but with the newly approved access to CMSIS and their prewritten library, it was necessary to delete all personalized structs and base addresses, along with some constants. Two timers were initialized to 1. record timestamps at which each pulse cycle’s edges were triggering the interrupts and 2. create delays between each velocity update with a PSC of 4000, since we were aiming for an update frequency of 1 Hz. Initialization of an interrupt was done by registering a route between GPIO and EXTI interrupt, unmasking the interrupt line, enabling both rising and falling triggers, and enabling the correct NVIC interrupt channel.\nInputs for the encoder signals were PA8 for encoder A and PA10 for encoder B. Both were part of GPIO Port A and as a part of the later GPIO pins, shared handlers across multiple pins. As a result, it was important to validate that it was that specific EXTI line that triggered the interrupt. The interrupts were each defined in EXTI9_5_IRQHandler and EXTI15_10_IRQHandler as each pin, PA8 and PA10, were each within the shared lines 5-9 and 10-15.\nSince this specific motor outputs 408 pulses per revolution (PPR) and we have a resolution of 4 edges per cycle from two signals, we can figure out the rotational velocity of the motor by counting the number of edges. We used the equation V = edge_count / (4 * 408). The direction was determined by comparing the states of the signals at each rising and falling edge, and came up with some logic.\n\n\n\nFigure 1: Direction logic"
+  },
+  {
+    "objectID": "labs/lab5/lab5.html#technical-documentation",
+    "href": "labs/lab5/lab5.html#technical-documentation",
+    "title": "Lab 5: Interrupts",
+    "section": "Technical Documentation",
+    "text": "Technical Documentation\nThe source code for the project can be found in this GitHub repository.\n\nFlow Chart\n\n\n\nFigure 2: Flow Chart\n\n\nFigure 2 depicts the flow chart of the interrupt handler design on the MCU in conjunction with the timing with the rest of the program.\n\n\nSchematic\n\n\n\nFigure 3: Schematic\n\n\nFigure 3 depicts the physical schematic of the design."
+  },
+  {
+    "objectID": "labs/lab5/lab5.html#results-and-discussion",
+    "href": "labs/lab5/lab5.html#results-and-discussion",
+    "title": "Lab 5: Interrupts",
+    "section": "Results and Discussion",
+    "text": "Results and Discussion\n\nOscilloscope\n\n\n\nFigure 4: Oscilloscope Trace for 2.52 V\n\n\n\n\n\nFigure 5: Oscilloscope Trace for 6.02 V\n\n\n\n\n\nFigure 6: Oscilloscope Trace for 9.97 V\n\n\nAttached are three oscilloscope traces displaying encoder signal A’s output when input with 2.52V, 6.02V, and 9.97V. By manually counting these edges, we can verify the velocity output at a specific time by comparing the hand-calculated velocity with the output velocity at the same voltage.\n2.52 V had a 232Hz encoder output as shown on the oscilloscope, which could be converted to a \\(232 / 408 = 0.568\\) rev/s calculation by hand. The program itself detected \\(0.569\\) rev/s. 8.15V hand-calculated was \\(577 / 408 = 1.414\\) rev/s and \\(1.418\\) rev/s detected. 9.93V: = \\(971 / 408 = 2.380\\) rev/s and \\(2.380\\) rev/s. Errors were minimal, usually to the thousandth degree, and all outputs were expected.\n\n\nManual Polling\nI did manual polling by removing the delay factor from the loop and calling the same update velocity function in another while loop. I toggled a separate output pin whenever the update velocity function to check how fast it would toggle, as in how fast the program would be able to manually function without detecting edges with interrupts. From Figure 7 below, I detected that that occurs at a 330 Hz frequency, which is much slower than around the 408 * 2.4 Hz that occurs at an input voltage of 10V.\n\n\n\nFigure 7: Oscope trace of polling"
+  },
+  {
+    "objectID": "labs/lab5/lab5.html#conclusion",
+    "href": "labs/lab5/lab5.html#conclusion",
+    "title": "Lab 5: Interrupts",
+    "section": "Conclusion",
+    "text": "Conclusion\nThe design made in this lab successfully read the velocity of a motor by utilizing interrupts and detecting the maximum number of encoder signal edges possible for the highest resolution possible. Total hours worked: 12 hours."
+  },
+  {
+    "objectID": "labs/lab5/lab5.html#ai-prototype-summary",
+    "href": "labs/lab5/lab5.html#ai-prototype-summary",
+    "title": "Lab 5: Interrupts",
+    "section": "AI Prototype Summary",
+    "text": "AI Prototype Summary\n\nAbriged Chat Log\n\nPrompt: What timers should I use on the STM32L432KC to generate frequencies ranging from 220Hz to 1kHz? What’s the best choice of timer if I want to easily connect it to a GPIO pin? What formulae are relevant, and what registers need to be set to configure them properly?\n\n\nRecommended Pin Connections: You should connect your encoder channels to a General-Purpose Timer (GPT) that supports encoder interface mode. TIM2 is a 32-bit timer available on the STM32L432KC, making it an excellent choice.\n\n\nChannel A PA0 TIM2_CH1 (Alternate Function) Encoder Phase 1 Input\nChannel B PA1 TIM2_CH2 (Alternate Function) Encoder Phase 2 Input\nIndex (Z) PB5 EXTI Line 5 Zero-position reference (Optional)\n\nEncoder Channels A and B are connected to the Timer peripherals (PA0/PA1). The Index (Z) Pulse, if available, is best handled by a regular External Interrupt (EXTI), as it only fires once per revolution. We will use PB5 as an example.\n\nTimer Setup (Conceptual Configuration): Before the interrupt handler can run, you must configure the peripherals. This typically involves setting GPIO Alternate Functions, enabling the timer clock, and setting the timer mode.\n\nI will provide a conceptual C code snippet showing the key register configuration steps, assuming a CMSIS (bare-metal) style, as this is closest to the hardware registers you’d manipulate.\n(Code attached)\n\nInterrupt Handler (TIM2_IRQHandler): The main logic for the quadrature encoder is to track the number of times the hardware counter overflows (goes from 0xFFFF to 0) or underflows (goes from 0 to 0xFFFF). This allows you to track a total count far exceeding the 16-bit limit of the counter register (2^16 = 65,536 pulses).\n\n(Code attached)\nHow the Timer Encoder Mode Works\n\nHardware Counting: The hardware timer (TIM2) constantly monitors the signals on PA0 (A) and PA1 (B). Based on the phase difference, it automatically increments or decrements the TIM2-&gt;CNT (Counter) register.\nRange Management: The counter is configured to run from 0 to 0xFFFF (65,535).\nInterrupt Trigger: When the count goes from 0xFFFF→0 (overflow, positive direction) or 0→0xFFFF (underflow, negative direction), the Update Interrupt Flag (UIF) is set, triggering the TIM2_IRQHandler.\nSoftware Extension: Inside the interrupt, we check the hardware direction flag (TIM2-&gt;CR1_DIR) and adjust the 32-bit software variable (total_encoder_pulses) by ±65,536.\nFinal Position: Your true, overall position is the sum of the software offset (total_encoder_pulses) and the current hardware count (TIM2-&gt;CNT).\nTotal Pulses=total_encoder_pulses+TIM2→CNT\n\n\n\nReflection\nI used Gemini’s 2.5-Flash model for this prototype. The two files provided built instantly, but had a difficult time integrating into the workflow that I had built. I think it made use of the CMSIS structs and macros well, but without the context of some of the GPIO pins I used, it needed some debugging to tweak everything so it worked. In the end, the direction stuff worked after some debugging but the revolutions was multiplied by a few terms up. I think the bot miscalculated some of the values it added and negated as underflow or overflow. But, the TIM initialization is very standard and easy to find off the internet, which is why it was probably easier for the LLM to fish that part out."
   },
   {
     "objectID": "labs/lab6/lab6.html",
