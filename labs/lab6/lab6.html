@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Mayu Tatsumi">
-<meta name="dcterms.date" content="2025-10-09">
+<meta name="dcterms.date" content="2025-10-22">
 <meta name="description" content="Lab 6">
 
 <title>Lab 6: The Internet of Things and Serial Peripheral Interface – E155 Portfolio</title>
@@ -22,6 +22,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -71,6 +106,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -119,8 +183,29 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#design-and-testing-methodology" id="toc-design-and-testing-methodology" class="nav-link" data-scroll-target="#design-and-testing-methodology">Design and Testing Methodology</a></li>
+  <li><a href="#technical-documentation" id="toc-technical-documentation" class="nav-link" data-scroll-target="#technical-documentation">Technical Documentation</a>
+  <ul class="collapse">
+  <li><a href="#schematic" id="toc-schematic" class="nav-link" data-scroll-target="#schematic">Schematic</a></li>
+  </ul></li>
+  <li><a href="#results-and-discussion" id="toc-results-and-discussion" class="nav-link" data-scroll-target="#results-and-discussion">Results and Discussion</a>
+  <ul class="collapse">
+  <li><a href="#logic-analyzer" id="toc-logic-analyzer" class="nav-link" data-scroll-target="#logic-analyzer">Logic Analyzer</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  <li><a href="#ai-prototype-summary" id="toc-ai-prototype-summary" class="nav-link" data-scroll-target="#ai-prototype-summary">AI Prototype Summary</a>
+  <ul class="collapse">
+  <li><a href="#prompts" id="toc-prompts" class="nav-link" data-scroll-target="#prompts">Prompts</a></li>
+  <li><a href="#reflection" id="toc-reflection" class="nav-link" data-scroll-target="#reflection">Reflection</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -152,7 +237,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 9, 2025</p>
+      <p class="date">October 22, 2025</p>
     </div>
   </div>
   
@@ -164,9 +249,101 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Nothing to see here just yet.</p>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>In this lab, we utilized a temperature sensor and an ESP8266 module that hosted a webserver to demonstrate the usage of the SPI protocol. The temperature sensor was controlled by the MCU through SPI, sending readings at various levels of precision back to the MCU, which then displayed the information to a simple HTML webpage. The webpage also allowed for simple control of an LED via UART.</p>
+<p>Lab Manual: <a href="https://hmc-e155.github.io/lab/lab6/">E155 Lab 6 Instructions</a></p>
+</section>
+<section id="design-and-testing-methodology" class="level2">
+<h2 class="anchored" data-anchor-id="design-and-testing-methodology">Design and Testing Methodology</h2>
+<p>I built an SPI library that contained <code>initSPI()</code> and <code>spiSendReceive()</code> functions, which respectively configured and enabled the SPI peripheral, and transmits a character (1 byte) over SPI and returns the received character. CMSIS standards were followed to the best of my ability, using pre-defined macros and <code>_VAL2FLD()</code> for any multi-bit values during configuration. <code>spiSendRecieve()</code> waits for the TXE flag to set to 1, which indicates an empty transmit buffer. Once it’s empty, it writes your specified byte (passed in to the function as a parameter) the 8-bit data register. We then wait for the RXNE flag to pop up, which indicates a full recieve buffer. This basically means we wait until we fully recieve a byte. We then read that byte from the data register, and cast it to a volatile character to correctly store it as an 8-bit integer. This works because SPI is full-duplex and both transmits and recieves a byte of information at the same time.</p>
+<p>I also built a <code>DS1722</code> library based off its <a href="https://hmc-e155.github.io/assets/doc/ds1722.pdf">datasheet</a> that contained <code>initTempSensor()</code>, <code>getTemp()</code>, and <code>setPrecision()</code>. These functions used the SPI interface to communicate to the sensor from the MCU. <code>initTempSensor()</code> only consisted of writing to address <code>0x80</code> for configuration and specifying continuous conversion mode via <code>0xEE</code>. <code>setPrecision()</code> was also was just some if-else statements that was called via UART and took input from the buttons the user pressed on the webpage. The precision would be specified on the sensor by, again, writing to address <code>0x80</code> and specifying the precision values using values between <code>0xE0</code> to <code>0xE8</code>, and higher precisions effectively took longer to convert.</p>
+<p>The <code>getTemp()</code> function converted between the values of MSB and LSB and a valid temperature in degrees Celsius. As stated in the DS1722 datasheet, the MSB (in address 0x02) contained the sign bit and integer value of the temperature. The LSB (in address 0x01) contained the fractional bits at increments of 1/2^4=1/16=0.0625 degrees Celsius, but due the last 4 bits always being 0, it was necessary to divide by 4^8=256 to get the correct fractional value. As a result, the final equation for the temperature was <span class="math inline">\(T = MSB + \frac{LSB}{4^8}\)</span>. The values for MSB and LSB were obtained by accessing the <code>0x02</code> address and sending a dummy byte to recieve its output, and doing the same with the <code>0x01</code> address for the LSB value.</p>
+<p>Building the webpage itself wasn’t so difficult since we were given a lot of starter code from the <a href="https://github.com/HMC-E155/hmc-e155/tree/main/lab/lab06">E155 GitHub Repository</a>. I think all I did was just edit a little bit of the HTML and add in a couple strings to pass over UART. There was some basic logic to allow selecting precision, but really nothing to write home about. We connected to the ESP’s webpage by connecting to its WiFi access point and going to <code>http://192.168.4.1/</code>.</p>
+</section>
+<section id="technical-documentation" class="level2">
+<h2 class="anchored" data-anchor-id="technical-documentation">Technical Documentation</h2>
+<p>The source code for the project can be found in this <a href="https://github.com/mayu-tatsu/e155-lab6">GitHub repository</a>.</p>
+<section id="schematic" class="level3">
+<h3 class="anchored" data-anchor-id="schematic">Schematic</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/lab6-schem.jpg" class="img-fluid figure-img"></p>
+<figcaption>Figure 1: Schematic</figcaption>
+</figure>
+</div>
+<p>Figure 1 depicts the physical schematic of the design. The layout is pretty simple, since the <code>PB3</code>, <code>PB4</code>, and <code>PB5</code> pins on the board have built-in alternate functions as SPI’s <code>SCK</code>, <code>SDO</code>, and <code>SDI</code> pins respectively. All that was needed was to specify it in the code during initialization. The <code>SERMODE</code> pin on the <code>DS1722</code> was connected to <code>V_DD</code> because a connection to <code>V_DD</code> specified a SPI interface standard, while a connection to <code>GND</code> would chose a 3-wire interface standard instead.</p>
+</section>
+</section>
+<section id="results-and-discussion" class="level2">
+<h2 class="anchored" data-anchor-id="results-and-discussion">Results and Discussion</h2>
+<section id="logic-analyzer" class="level3">
+<h3 class="anchored" data-anchor-id="logic-analyzer">Logic Analyzer</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/lab6-oscope-3.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 2: Logic Analyzer Trace during Read phase of SPI Transaction</figcaption>
+</figure>
+</div>
+<p>Figure 2 above is a sample SPI transaction from logic analyzer.</p>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>The design made in this lab successfully read temperatures through the <code>DS1722</code> sensor and displayed them on a simple HTML website hosted on an <code>ESP8266</code> module. The SPI protocol was initialized and utilized a send-recieve function to monitor changes. The UART protocol was also utilized to control a LED on the board. There was some confusion and unclear signals from the logic analyzer. Total hours worked: 14 hours.</p>
+</section>
+<section id="ai-prototype-summary" class="level2">
+<h2 class="anchored" data-anchor-id="ai-prototype-summary">AI Prototype Summary</h2>
+<section id="prompts" class="level3">
+<h3 class="anchored" data-anchor-id="prompts">Prompts</h3>
+<blockquote class="blockquote">
+<p><strong>Prompt 1:</strong> I’m making a web portal to interface with a temperature sensor. Create a HTML page that looks good and is intuitive to show the temperature, control an LED, and change the precision of the readout.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>Prompt 2:</strong> Write me a C function to carry out a SPI transaction to retrieve a temperature reading from a DS1722 sensor. Make use of CMSIS libraries for the STM32L432KC.</p>
+</blockquote>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="an">@brief</span><span class="co"> Performs a 3-byte SPI transaction to read the 16-bit temperature from the DS1722 sensor.</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"> * * Protocol: [COMMAND: 0x01] [DUMMY] [DUMMY] results in [GARBAGE] [T_MSB] [T_LSB]</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"> * The raw 16-bit data is in Q12.4 format (12 integer bits, 4 fractional bits).</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"> * * </span><span class="an">@return</span><span class="co"> float The temperature reading in degrees Celsius.</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="dt">float</span> getTemp<span class="op">(</span><span class="dt">void</span><span class="op">){</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">uint8_t</span> rx_msb<span class="op">,</span> rx_lsb<span class="op">;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int16_t</span> raw_temp<span class="op">;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 1. Assert Chip Select (CS active high to start transaction)</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  digitalWrite<span class="op">(</span>SPI_CS<span class="op">,</span> PIO_HIGH<span class="op">);</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 2. Send Command Byte (0x01) to read T_MSB register. </span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="co">// The first byte received here is garbage data from the command transmission.</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  spiSendReceive<span class="op">(</span>DS1722_REG_TEMP_MSB<span class="op">);</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 3. Send Dummy Byte (0xFF) to clock out Temperature MSB</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  rx_msb <span class="op">=</span> <span class="op">(</span><span class="dt">uint8_t</span><span class="op">)</span>spiSendReceive<span class="op">(</span><span class="bn">0xFF</span><span class="op">);</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 4. Send Dummy Byte (0xFF) to clock out Temperature LSB</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  rx_lsb <span class="op">=</span> <span class="op">(</span><span class="dt">uint8_t</span><span class="op">)</span>spiSendReceive<span class="op">(</span><span class="bn">0xFF</span><span class="op">);</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 5. De-assert Chip Select (CS inactive low to end transaction)</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  digitalWrite<span class="op">(</span>SPI_CS<span class="op">,</span> PIO_LOW<span class="op">);</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 6. Combine MSB and LSB into a signed 16-bit integer</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="co">// The casting to int16_t is critical for correct handling of negative (two's complement) temperatures.</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  raw_temp <span class="op">=</span> <span class="op">(</span><span class="dt">int16_t</span><span class="op">)((</span>rx_msb <span class="op">&lt;&lt;</span> <span class="dv">8</span><span class="op">)</span> <span class="op">|</span> rx_lsb<span class="op">);</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 7. Convert raw value (Q12.4 fixed-point) to degrees Celsius (raw * 0.0625)</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="op">(</span><span class="dt">float</span><span class="op">)</span>raw_temp <span class="op">*</span> DS1722_TEMP_RESOLUTION<span class="op">;</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="reflection" class="level3">
+<h3 class="anchored" data-anchor-id="reflection">Reflection</h3>
+<p>I used Gemini’s 2.5-Flash model for this prototype. Its first response to the prompt generated an HTML file with some JavaScript logic and styling to make it look nicer. However, as we were working on an MCU and needed to convert the HTML into string format, I had to ask it to create another version of the file that can fit with the structure of our project. Literally none of it worked though, even after like half an hour of debugging. The webserver kept throwing the <code>Could not connect to the MCU. Please check your connections. (10 or fewer bytes were received from the processor.)</code> error. Assuming that the string I was trying to pass in was too long, I tried to lengthen the <code>tx_buffer</code> variable to 2048, but that didn’t work either. It was also diffcult asking for a version of the code without giving it any context, so I tried passing in my <code>main.c</code> and <code>DS1722.c</code>, but all it did was break the formatting of the code. I would rate this process 1/10. I think it showed me some cool things you can do with HTML that I didn’t know about it beforehand, but the whole formatting issue got on my nerves and while it did built, did not get off the ground at all.</p>
+<p>For the second prompt, it was able to utilize SPI just fine on the first try, but its logic was off and resulted in temperature values on the order of 1-2 degrees Celsius. The LLM edited my function <code>getTemp()</code> to have the msb and lsb values recorded right after each other instead of each address and reading after each operation. This, along with the bit-shift, could be the reason why the calculation isn’t being output properly.</p>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
