@@ -2,7 +2,7 @@
 title: "Lab 3: Keypad Scanner"
 description: "Lab 3"
 author: "Mayu Tatsumi"
-date: "9/24/25"
+date: "11/5/24"
 categories:
   - labreport
 draft: false
@@ -17,21 +17,39 @@ LINK: [E155 Lab 3 Instructions](https://hmc-e155.github.io/lab/lab3/)
 
 ## Design and Testing Methodology
 
-Theoretically, the matrix keypad was read by sending high signals to each of its four rows, and reading the outputs of each column to determine what button was being pressed. The asynchronous user inputs were synchronized to the program clk by a synchronizer, and "read" using a finite state machine (FSM). The keypad reading also output a strobe-like wire, which was the input for the debouncer. Debouncing was utilized to prevent misreading of mechanical switches, and was also implemented as an FSM. Both the debouncer output and the value read off the keypad were combined to store previous and current input values of the matrix in a D flip-flop. The seven-segment display code was reused from last lab to drive the display.
+The main FSM (in `keypad_scan` module) scans the 4x4 matrix keypad and also includes debouncing logic. It cycles through the rows by sequentially driving the rows output high one at a time via the states `S1_R0` to `S4_R3`. After selecting a row, it enters a corresponding check state (`S5_CHECK_R0` to `S8_CHECK_R3`) where it examines the `col` input lines to detect if any key in that row is pressed.
 
-The FSM for the keypad was designed as so. There were 20 states, 4 for reading a row each, and 16 for each key press. With no user input, the FSM is supposed to cycle through the row-checking states, which each send out a specific `row` output to check if any of the switches are ON. This checking was done via the `col` inputs, where any value of `col` that was found to be high would immediately move the FSM to the key-pressed state attributed to the specific key press. Any release of the key returns it to the scanning mode, cycling through the 4 states.
+A `counter` is used to enforce a short `SCAN_DELAY` between row scans. If a column input is detected, the FSM moves to the `S9_CHECKING` state, where it waits for `DEBOUNCE` clock cycles to ensure the key press is stable. Once confirmed, the FSM transitions to `S10_PRESSED`, generating a one-cycle pulse `num_new` to signal a newly pressed key. Then, it enters the `S11_WAIT` state, using `HOLD_TIME` with the `counter` to wait for the key to be released before returning to S0_IDLE. 
 
-![Figure 1: FSM diagram of `keypad`](images/lab3-keypad-fsm.jpg)
+The `rows` register is updated via `newRows` when `rowChange` is asserted, and the `increment` and `clear` signals control the `counter` for timing across the scan, debounce, and hold states.
 
-The FSM for the debouncer was designed with a 10ms delay, making sure that there was a solid 10ms button press before sending a concrete signal to the rest of the system. It utilizes 4 states. It starts in the waiting-at-0 state, where the FSM waits for any input of 1 to move it out to the checking-for-1 state. The waiting-at-0 state also continuously outputs a `timer_reset` signal to the external 10ms timer, since no input is detected as of now. When some switch bounce or user input drives the switch to 1, we move to the checking-for-1, which starts the external timer by driving `timer_reset = 0` and makes sure that any discontinuous input of 1 moves the machine back to the waiting-at-0 state. If the input is continuous for over 10ms, when the `timer_done` is driven high from the external timer, then the output of this debouncer FSM is driven high as well to signify a debounced signal.
+The `keypad_scan` design combines row scanning, key detection, and debouncing into a single FSM, making it resource-efficient and better synchronized, but is less modular and with increased complexity. In contrast, my initial design of splitting the scanner/decoder and debouncing FSMs into two separates debouncing from key decoding, improving modularity and flexibility in debounce timing, but it uses more hardware and requires more attention regarding timing for accurate key detection.
 
-![Figure 2: FSM diagram of `debouncer`](images/lab3-debouncer-fsm.jpg)
+![Figure 1: FSM of the keypad-scan module](images/lab3-fsm.jpg)
+
+| state       | output                                                | nextstate                                                                                            |
+|:-----------:|:-----------------------------------------------------:|:----------------------------------------------------------------------------------------------------:|
+| S0_IDLE     | `clear` = 1                                           | S1_R0                                                                                                |
+| S1_R0       | `newRows` = 4'b0001<br>`rowChange` = 1<br>`clear` = 1 | S5_CHECK_R0                                                                                          |
+| S2_R1       | `newRows` = 4'b0010<br>`rowChange` = 1<br>`clear` = 1 | S6_CHECK_R1                                                                                          |
+| S3_R2       | `newRows` = 4'b0100<br>`rowChange` = 1<br>`clear` = 1 | S7_CHECK_R2                                                                                          |
+| S4_R3       | `newRows` = 4'b1000<br>`rowChange` = 1<br>`clear` = 1 | S8_CHECK_R3                                                                                          |
+| S5_CHECK_R0 | `increment` = 1                                       | `|col`: S9_CHECKING<br>`counter >= SCAN_DELAY`: S2_R1<br>S5_CHECK_R0                                 |
+| S6_CHECK_R1 | `increment` = 1                                       | `|col`: S9_CHECKING<br>`counter >= SCAN_DELAY`: S3_R2<br>S6_CHECK_R1                                 |
+| S7_CHECK_R2 | `increment` = 1                                       | `|col`: S9_CHECKING<br>`counter >= SCAN_DELAY`: S4_R3<br>S7_CHECK_R2                                 |
+| S8_CHECK_R3 | `increment` = 1                                       | `|col`: S9_CHECKING<br>`counter >= SCAN_DELAY`: S1_R0<br>S8_CHECK_R3                                 |
+| S9_CHECKING | `increment` = 1                                       | `counter >= DEBOUNCE && |col`: S10_PRESSED<br>`counter >= DEBOUNCE && ~|col`: S0_IDLE<br>S9_CHECKING |
+| S10_PRESSED | `num_new` = 1                                         | S11_WAIT                                                                                             |
+| S11_WAIT    |  `increment` = 1                                      | `~|col && counter >= HOLD_TIME`: S0_IDLE<br>S11_WAIT                                                 |
+: FSM State Transition Table {#transition-tbl}
+
+Internal pull-up resistors were utilized to prevent floating values on the asynchronous column inputs of the 4x4 matrix keypad. These created an active-low standard in the HDL.
+
+These physical features below were derived in the earlier Lab 2, but here is the calculations for them as well:
 
 The PNP transistor was utilized to source more current for the dual seven-segment display. With only a 8 mA current being sourced from each pin, it was not enough to power each cathode. As a result, the PNP transistors, given a 5 mA current from the base, or the pins, collected from the 3.3V voltage source and pulled a current enough to power the seven-segment display. The 5 mA current at the base was regulated by a resistor of 560 $\,\Omega$. This was calculated via Ohm's Law, $V = IR$, where the voltage drop was calculated by $2.6 - 0$. The $2.6 V$ was found by negating the voltage drop from the 3.3 V emitter to the base, as given by $V_{BE(Sat)}$ from the datasheet. The $0 V$ was so due to the pin it connected to was grounded. As a result, $(2.6 - 0) / 0.05 = 520\,\Omega$, and the resistor used was a similar 510 $\,\Omega$. The datasheet mentioned is [linked here](https://hmc-e155.github.io/assets/doc/2N3906-D.pdf).
 
 The resistors for each segment of the red dual seven-segment display were chosen based on the datasheet [linked here](https://docs.broadcom.com/doc/HDSP-521A-523A-Dual-Digit-General-Purpose-7-Segment-Display-DS). Around a forward current of 5mA, the forward voltage of each LED segment drops down to 1.8V. Due to the $V_{CE(Sat)} = 0.7$ at a current of 1 mA, there was a voltage drop from the emitter to the collector, resulting in the collector being at roughly 3 V. Knowing this, we can reconfigure Ohm's Law to figure out the appropriate resistor. $R = V/I = (3.0 - 1.8) / 0.002 = 600$, or roughly 620 $\,\Omega$.
-
-Pull-down resistors were utilized to prevent floating values of `col` when the matrix keypad's buttons were not pressed. The value of the resistors were found by calculating a simple $V=IR$ equation where $V=3.3V$ and $I=3mA$, and its output was $I=1.1k\,\Omega$. 1.2k$\,\Omega$ resistors were used for each column output.
 
 ## Technical Documentation
 
@@ -39,35 +57,39 @@ The source code for the project can be found in this [GitHub repository](https:/
 
 ### Block Diagram
 
-![Figure 3: Block diagram of the Lab 3 HDL code](images/lab3-block.jpg)
+![Figure 2: Block diagram of the Lab 3 HDL code](images/lab3-block.jpg)
 
-Figure 3 depicts the block diagram of the design. The top-level module `lab3_mt` instantiates eight submodules within it. `clk_gen` houses the `clk` generation using the onboard high-speed oscillator through the `HSOSC` module and a counter to divide it down to 100 Hz. The `synchronizer` instantiates a simple two-stage flip flop to synchronize the asynchronous column inputs into `sync_col`. The `keypad` interacts with the external keypad, sending signals through `row` as an output and intaking `col` to determine the number being pressed, if at all, and to output a strobe `key_onebit` that signals a button being pressed. The strobe is then passed into the `debouncer`, which uses an external timer module `debouncer_timer` to create a 10ms delay to determine a true key press. This information and the key pressed information is then passed into `keypad_storage`, where the last input is stored as well, using a D-flip flop. These two values utilize the `sev_seg_sel` and `sev_seg` modules written for lab 1 and 2 to display the values onto a dual seven segment display.
+Figure 3 depicts the block diagram of the design. The top-level module `lab3_mt` instantiates eight submodules within it. `clk_gen` houses the clock generation using the onboard high-speed oscillator through the HSOSC module and a counter to divide it down to both 10 kHz and 100 Hz. The `synchronizer` instantiates a simple two-stage flip-flop to synchronize the asynchronous column inputs into `sync_col`. `sync_col` is then passed into the `keypad` submodules, which include `keypad_scan`, `keypad_decoder`, and `keypad_storage`. The `keypad_scan` module drives each of the rows and detects any key presses, generating a one-cycle pulse `num_new` for each newly pressed key. The `keypad_decoder` module uses combinational logic to translate the active row and column into a 4-bit key value, while `keypad_storage` records the most recent and previous key presses using D-flip-flops. These stored values are then sent to the `sev_seg_sel` and `sev_seg` modules (written for Labs 1 and 2), which multiplex and convert the 4-bit values into 2 seven-segment displays, allowing both the current and previous key presses to be displayed.
 
 ### Schematic
 
-![Figure 4: Schematic of the external hardware used for Lab 3](images/lab3-schem.jpg)
+![Figure 3: Schematic of the external hardware used for Lab 3](images/lab3-schem.jpg)
 
-Figure 4 depicts the physical schematic of the design. The almost all I/O pins were utilized. As usual, the reset was routed to a button on the board. Same as last lab, each cathode segment of the dual seven-segment display was connected to a pin, and the two common anodes of the display were connected from a source-generating PNP transistor, which were also connected to a pin each on the FPGA. Those pins were enabled and disabled by the `seg1en` and `seg2en` enable signals. The `row` outputs and `col` inputs of the 4x4 matrix keypad were each assigned to a pin, with 1.2k$\,\Omega$ pulldown resistors to prevent floating zeros on the inputs. 
+Figure 4 depicts the physical schematic of the design. The almost all I/O pins were utilized. Same as Lab 2, each cathode segment of the dual seven-segment display was connected to a pin, and the two common anodes of the display were connected from a source-generating PNP transistor, which were also connected to a pin each on the FPGA. Those pins were enabled and disabled by the `seg1en` and `seg2en` enable signals. The 4-bit `row` outputs and `async_col` inputs of the 4x4 matrix keypad were each assigned to a pin, with the `async_col` values connected to 6.8k$\,\Omega$ internal pullup resistors, specified in Lattice. 
 
 ## Results and Discussion
 
 ### Testbench Simulation
 
-The design did not meet intended design objectives. 
+The design did met all intended design objectives, and behaves as expected under testbench testing.
 
-![Figure 5: Waveforms made by clk_gen testbench](images/lab3-clk-gen-waves.png)
+![Figure 4: Waveforms made by clk_gen testbench](images/lab3-clk-gen-waves.png)
 
-![Figure 6: Waveforms made by keypad testbench](images/lab3-keypad-waves.png)
+![Figure 5: Waveforms made by synchronizer testbench](images/lab3-synchronizer-waves.png)
 
-![Figure 7: Waveforms made by debouncer_timer testbench](images/lab3-debouncer-timer-waves.png)
+![Figure 6: Waveforms made by keypad_scan testbench](images/lab3-keypad-scan-waves.png)
 
-![Figure 8: Waveforms made by sev_seg_sel testbench](images/lab3-sev-seg-sel-waves.png)
+![Figure 7: Output from keypad_decoder testbench](images/lab3-keypad-decoder-results.png)
 
-![Figure 9: Waveforms made by sev_seg testbench](images/lab3-sev-seg-waves.png)
+![Figure 8: Waveforms made by keypad_storage testbench](images/lab3-keypad-storage-waves.png)
+
+![Figure 9: Waveforms made by sev_seg_sel testbench](images/lab3-sev-seg-sel-waves.png)
+
+![Figure 10: Waveforms made by sev_seg testbench](images/lab3-sev-seg-waves.png)
 
 ## Conclusion
 
-The design made in this lab was not successful. Most of my time was spent trying to debug a segmentation-violation error that came up on Lattice during synthesis. In the end, I swtiched to Synplify Pro synthesizer under direction of Kavi, who was unable to solve the issue as well. The biggest issue I found with the design was with the `keypad` FSM. No matter what, the FSM refued to move to the next reading state, only ever sending a signal to Row 0. As a result of that and probably some other issues I wasn't able to get a good look at, the seven-segment display wouldn't change to any other value, outside of the default 0 value. 30 hours were spent on this lab. 
+The design made in this lab was successful. After my initial failure, I completely redid my FSM, combining the two into one since I felt like that the interaction between the two FSMs was difficult to parse and debug. One of the reasons I had a difficult time getting this lab to work in the initial time allotted was bcause most of my time was spent trying to debug a segmentation-violation error that came up on Lattice during synthesis. In the end, I swtiched to Synplify Pro synthesizer under direction of TA Kavi, who was unable to solve the issue as well. Through this learning process, I learned how to design more robust FSMs and debug active-low/active-high systems. Overall, I was able to drive a dual seven-segment matrix given inputs from a 4x4 matrix keypad and display the most recent and the last key value pressed. 30 hours were spent on this lab, along with roughly 20 hours for the redo (so 50 total).
 
 ## AI Prototype Summary
 ::: {.grid}
@@ -113,3 +135,10 @@ Regarding the output, I found the naming conventions interesting and the header 
 
 As a result of these LLM outputs, I haven't changed my stance on using LLMs for these projects. I could probably use it to help write common and/or redundant idioms. However, I am still uncertain of its ability to use external contexts and provide a synthesizable and working module, especially regarding redundant and duplicate content. While coding, it may be a good idea to consult the LLM to figure out reference idioms and removing small bugs and typos, but not good enough to completely generate any program.
 :::
+:::
+
+## Initial Attempt
+
+![Figure 11: Decoding FSM](images/lab3-keypad-fsm.jpg)
+
+![Figure 12: Debouncing FSM](images/lab3-debouncer-fsm.jpg)
